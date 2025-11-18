@@ -50,11 +50,3 @@ models:
 
 
 
-seeds:
-  rl_project:  # nombre de tu proyecto
-    +database: DEV_BRONZE
-    +schema: ROCKET_LEAGUE
-
-
-vars:
-  unknown_country_code: 'UNKNOWN'

@@ -11,7 +11,7 @@ WITH src_countries AS (
 
 normalized AS (
     SELECT
-        COALESCE(raw_code, var('unknown_country_code')) AS raw_code_clean,
+        COALESCE(raw_code, 'UNKNOWN') AS raw_code_clean,
         country_name,
         iso2,
         iso3166_2,
