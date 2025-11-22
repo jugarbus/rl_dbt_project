@@ -18,23 +18,23 @@ sources:
         description: "RLCS players database (all players who played a main event or a closed qualifier)."
         columns:
           - name: player_id
-            data_type: varchar
+            data_type: string
             description: "octane.gg player ID. MongoDB ObjectId created Octane.gg"
 
           - name: player_slug
-            data_type: varchar
+            data_type: string
             description: "Player URL."
 
           - name: player_tag
-            data_type: varchar
+            data_type: string
             description: "Player in-game tag."
 
           - name: player_name
-            data_type: varchar
+            data_type: string
             description: "Player IRL name."
 
           - name: player_country
-            data_type: varchar
+            data_type: string
             description: "Player country."
 
 
@@ -43,43 +43,43 @@ sources:
         description: "RLCS 2021-22 main information event by event, match by match, game by game."
         columns:
           - name: event_id
-            data_type: varchar
+            data_type: string
             description: "octane.gg event ID (MongoDB idObject)."
 
           - name: event
-            data_type: varchar
+            data_type: string
             description: "Event name."
 
           - name: event_split
-            data_type: varchar
+            data_type: string
             description: "Event split / part of the season."
 
           - name: event_region
-            data_type: varchar
+            data_type: string
             description: "Event region."
 
           - name: event_slug
-            data_type: varchar
+            data_type: string
             description: "octane.gg event URL."
 
           - name: event_start_date
-            data_type: timestamp_ntz
+            data_type: timestamp_tz
             description: "Event start date."
 
           - name: event_end_date
-            data_type: timestamp_ntz
+            data_type: timestamp_tz
             description: "Event end date."
 
           - name: event_tier
-            data_type: varchar
+            data_type: string
             description: "Event tier / level."
 
           - name: event_phase
-            data_type: varchar
+            data_type: string
             description: "Event phase."
 
           - name: prize_money
-            data_type: number
+            data_type: float
             description: "Event prize money (not phase prize money)."
 
           - name: stage_step
@@ -87,15 +87,15 @@ sources:
             description: "Stage step in event phase."
 
           - name: stage
-            data_type: varchar
+            data_type: string
             description: "Stage name."
 
           - name: stage_start_date
-            data_type: timestamp_ntz
+            data_type: timestamp_tz
             description: "Stage start date."
 
           - name: stage_end_date
-            data_type: timestamp_ntz
+            data_type: timestamp_tz
             description: "Stage end date."
 
           - name: stage_is_lan
@@ -107,27 +107,27 @@ sources:
             description: "Is the stage a qualifier?"
 
           - name: liquipedia_link
-            data_type: varchar
+            data_type: string
             description: "Liquipedia Rocket League link."
 
           - name: location_venue
-            data_type: varchar
+            data_type: string
             description: "Event venue."
 
           - name: location_city
-            data_type: varchar
+            data_type: string
             description: "Event city."
 
           - name: location_country
-            data_type: varchar
+            data_type: string
             description: "Event country."
 
           - name: match_id
-            data_type: varchar
+            data_type: string
             description: "octane.gg match ID."
 
           - name: match_slug
-            data_type: varchar
+            data_type: string
             description: "octane.gg match URL."
 
           - name: match_number
@@ -135,15 +135,15 @@ sources:
             description: "Match number during stage."
 
           - name: match_round
-            data_type: varchar
+            data_type: string
             description: "Match round during stage."
 
           - name: match_date
-            data_type: timestamp_ntz
+            data_type: timestamp_tz
             description: "Match date."
 
           - name: match_format
-            data_type: varchar
+            data_type: string
             description: "Match format (best of 5 / 7)."
 
           - name: reverse_sweep_attempt
@@ -155,7 +155,7 @@ sources:
             description: "Is the match a reverse sweep?"
 
           - name: game_id
-            data_type: varchar
+            data_type: string
             description: "octane.gg game ID."
 
           - name: game_number
@@ -163,7 +163,7 @@ sources:
             description: "Game number in match."
 
           - name: game_date
-            data_type: timestamp_ntz
+            data_type: timestamp_tz
             description: "Game date."
 
           - name: game_duration
@@ -171,11 +171,11 @@ sources:
             description: "Game duration."
 
           - name: map_id
-            data_type: varchar
+            data_type: string
             description: "Map ID."
 
           - name: map_name
-            data_type: varchar
+            data_type: string
             description: "Map name."
 
           - name: overtime
@@ -183,36 +183,144 @@ sources:
             description: "Did the game go into overtime?"
 
           - name: ballchasing_id
-            data_type: varchar
+            data_type: string
             description: "ballchasing.com ID (link to replay uploaded)."
 
 
       - name: raw_games_players
-        description: "Per player Rocket League game statistics."
+        description: ""
         columns:
           - name: game_id
-            data_type: varchar
+            data_type: string
             description: "octane.gg game ID. MongoDB objectID"
 
-          - name: color
-            data_type: varchar
-            description: "Team color."
-
-          - name: team_id
-            data_type: varchar
-            description: "octane.gg team ID."
-
-          - name: team_region
-            data_type: varchar
-            description: "Team region."
-
           - name: player_id
-            data_type: varchar
+            data_type: string
             description: "octane.gg player ID."
 
-          - name: player_tag
-            data_type: varchar
-            description: "Player in-game tag."
+          - name: team_id
+            data_type: string
+            description: "octane.gg team ID."
+
+          - name: platform_id
+            data_type: string
+            description: "Platform-specific player ID."
+
+          - name: platform
+            data_type: string
+            description: "Player gaming platform."
+
+          - name: car_id
+            data_type: number
+            description: "Car ID."
+
+          - name: car_name
+            data_type: string
+            description: "Car name."
+
+          - name: boost_bpm
+            data_type: float
+            description: "Boost collected per minute."
+
+          - name: boost_bcpm
+            data_type: float
+            description: "Boost consumed per minute."
+
+          - name: boost_avg_amount
+            data_type: float
+            description: "Average amount of boost."
+
+          - name: boost_amount_collected
+            data_type: float
+            description: "Amount of boost collected."
+
+          - name: boost_amount_stolen
+            data_type: float
+            description: "Amount of boost stolen (taken on opponent side)."
+
+          - name: boost_amount_used_while_supersonic
+            data_type: float
+            description: "Amount of boost used while at supersonic speed."
+
+          - name: boost_percent_zero_boost
+            data_type: float
+            description: "Percentage of time spent with no boost."
+
+          - name: boost_percent_full_boost
+            data_type: float
+            description: "Percentage of time spent with full boost."
+
+          - name: positioning_avg_distance_to_ball
+            data_type: float
+            description: "Average distance to the ball."
+
+          - name: positioning_avg_distance_to_mates
+            data_type: float
+            description: "Average distance to teammates."
+
+          - name: positioning_goals_against_while_last_defender
+            data_type: float
+            description: "Goals conceded while the player is last defender."
+
+          - name: positioning_percent_defensive_third
+            data_type: float
+            description: "Percentage of time spent in defensive third."
+
+          - name: positioning_percent_offensive_third
+            data_type: float
+            description: "Percentage of time spent in offensive third."
+
+          - name: positioning_percent_behind_ball
+            data_type: float
+            description: "Percentage of time spent behind the ball."
+
+          - name: positioning_percent_most_back
+            data_type: float
+            description: "Percentage of time spent as most backward player."
+
+          - name: positioning_percent_most_forward
+            data_type: float
+            description: "Percentage of time spent as most forward player."
+
+          - name: positioning_percent_closest_to_ball
+            data_type: float
+            description: "Percentage of time spent as closest player to the ball."
+
+          - name: positioning_percent_farthest_from_ball
+            data_type: float
+            description: "Percentage of time spent as farthest player from the ball."
+
+          - name: movement_avg_speed
+            data_type: float
+            description: "Average speed."
+
+          - name: movement_avg_speed_percentage
+            data_type: float
+            description: "Average speed as percentage of max reachable speed."
+
+          - name: movement_time_powerslide
+            data_type: float
+            description: "Total powerslide duration."
+
+          - name: movement_count_powerslide
+            data_type: float
+            description: "Total number of powerslides."
+
+          - name: movement_percent_slow_speed
+            data_type: float
+            description: "Percentage of time spent at slow speed."
+
+          - name: movement_percent_supersonic_speed
+            data_type: float
+            description: "Percentage of time spent at supersonic speed."
+
+          - name: movement_percent_ground
+            data_type: float
+            description: "Percentage of time spent on the ground."
+
+          - name: movement_percent_high_air
+            data_type: float
+            description: "Percentage of time spent high in the air."
 
           - name: core_shots
             data_type: number
@@ -230,306 +338,6 @@ sources:
             data_type: number
             description: "Assists (last pass before a goal)."
 
-          - name: core_score
-            data_type: number
-            description: "Game score."
-
-          - name: core_shooting_percentage
-            data_type: number
-            description: "Goals / shots ratio."
-
-          - name: boost_bpm
-            data_type: number
-            description: "Boost collected per minute."
-
-          - name: boost_bcpm
-            data_type: number
-            description: "Boost consumed per minute."
-
-          - name: boost_avg_amount
-            data_type: number
-            description: "Average amount of boost."
-
-          - name: boost_amount_collected
-            data_type: number
-            description: "Amount of boost collected."
-
-          - name: boost_amount_stolen
-            data_type: number
-            description: "Amount of boost stolen (taken on opponent side)."
-
-          - name: boost_amount_collected_big
-            data_type: number
-            description: "Amount of boost collected from big pads."
-
-          - name: boost_amount_stolen_big
-            data_type: number
-            description: "Amount of boost stolen from big pads (taken on opponent side)."
-
-          - name: boost_amount_collected_small
-            data_type: number
-            description: "Amount of boost collected from small pads."
-
-          - name: boost_amount_stolen_small
-            data_type: number
-            description: "Amount of boost stolen from small pads (taken on opponent side)."
-
-          - name: boost_count_collected_big
-            data_type: number
-            description: "Big boost pads collected."
-
-          - name: boost_count_stolen_big
-            data_type: number
-            description: "Big boost pads stolen (taken on opponent side)."
-
-          - name: boost_count_collected_small
-            data_type: number
-            description: "Small boost pads collected."
-
-          - name: boost_count_stolen_small
-            data_type: number
-            description: "Small boost pads stolen (taken on opponent side)."
-
-          - name: boost_amount_overfill
-            data_type: number
-            description: "Amount of boost collected above 100 (overfill)."
-
-          - name: boost_amount_overfill_stolen
-            data_type: number
-            description: "Amount of boost stolen over the limit (over 100, on opponent side)."
-
-          - name: boost_amount_used_while_supersonic
-            data_type: number
-            description: "Amount of boost used while at supersonic speed."
-
-          - name: boost_time_zero_boost
-            data_type: number
-            description: "Time spent with no boost."
-
-          - name: boost_percent_zero_boost
-            data_type: number
-            description: "Percentage of time spent with no boost."
-
-          - name: boost_time_full_boost
-            data_type: number
-            description: "Time spent with full (100) boost."
-
-          - name: boost_percent_full_boost
-            data_type: number
-            description: "Percentage of time spent with full boost."
-
-          - name: boost_time_boost_0_25
-            data_type: number
-            description: "Time spent with boost between 0 and 25."
-
-          - name: boost_time_boost_25_50
-            data_type: number
-            description: "Time spent with boost between 25 and 50."
-
-          - name: boost_time_boost_50_75
-            data_type: number
-            description: "Time spent with boost between 50 and 75."
-
-          - name: boost_time_boost_75_100
-            data_type: number
-            description: "Time spent with boost between 75 and 100."
-
-          - name: boost_percent_boost_0_25
-            data_type: number
-            description: "Percentage of time spent with boost between 0 and 25."
-
-          - name: boost_percent_boost_25_50
-            data_type: number
-            description: "Percentage of time spent with boost between 25 and 50."
-
-          - name: boost_percent_boost_50_75
-            data_type: number
-            description: "Percentage of time spent with boost between 50 and 75."
-
-          - name: boost_percent_boost_75_100
-            data_type: number
-            description: "Percentage of time spent with boost between 75 and 100."
-
-          - name: movement_avg_speed
-            data_type: number
-            description: "Average speed."
-
-          - name: movement_total_distance
-            data_type: number
-            description: "Total distance traveled."
-
-          - name: movement_time_supersonic_speed
-            data_type: number
-            description: "Time spent at supersonic speed."
-
-          - name: movement_time_boost_speed
-            data_type: number
-            description: "Time spent while using boost."
-
-          - name: movement_time_slow_speed
-            data_type: number
-            description: "Time spent at slow speed."
-
-          - name: movement_time_ground
-            data_type: number
-            description: "Time spent on the ground."
-
-          - name: movement_time_low_air
-            data_type: number
-            description: "Time spent low in the air."
-
-          - name: movement_time_high_air
-            data_type: number
-            description: "Time spent high in the air."
-
-          - name: movement_time_powerslide
-            data_type: number
-            description: "Total powerslide duration."
-
-          - name: movement_count_powerslide
-            data_type: number
-            description: "Total number of powerslides."
-
-          - name: movement_avg_powerslide_duration
-            data_type: number
-            description: "Average powerslide duration."
-
-          - name: movement_avg_speed_percentage
-            data_type: number
-            description: "Average speed as percentage of max reachable speed."
-
-          - name: movement_percent_slow_speed
-            data_type: number
-            description: "Percentage of time spent at slow speed."
-
-          - name: movement_percent_boost_speed
-            data_type: number
-            description: "Percentage of time spent at boost speed."
-
-          - name: movement_percent_supersonic_speed
-            data_type: number
-            description: "Percentage of time spent at supersonic speed."
-
-          - name: movement_percent_ground
-            data_type: number
-            description: "Percentage of time spent on the ground."
-
-          - name: movement_percent_low_air
-            data_type: number
-            description: "Percentage of time spent low in the air."
-
-          - name: movement_percent_high_air
-            data_type: number
-            description: "Percentage of time spent high in the air."
-
-          - name: positioning_avg_distance_to_ball
-            data_type: number
-            description: "Average distance to the ball."
-
-          - name: positioning_avg_distance_to_ball_possession
-            data_type: number
-            description: "Average distance to the ball while team has possession."
-
-          - name: positioning_avg_distance_to_ball_no_possession
-            data_type: number
-            description: "Average distance to the ball while opponent has possession."
-
-          - name: positioning_avg_distance_to_mates
-            data_type: number
-            description: "Average distance to teammates."
-
-          - name: positioning_time_defensive_third
-            data_type: number
-            description: "Time spent in defensive third."
-
-          - name: positioning_time_neutral_third
-            data_type: number
-            description: "Time spent in neutral third."
-
-          - name: positioning_time_offensive_third
-            data_type: number
-            description: "Time spent in offensive third."
-
-          - name: positioning_time_defensive_half
-            data_type: number
-            description: "Time spent in the defensive half."
-
-          - name: positioning_time_offensive_half
-            data_type: number
-            description: "Time spent in the offensive half."
-
-          - name: positioning_time_behind_ball
-            data_type: number
-            description: "Time spent behind the ball."
-
-          - name: positioning_time_in_front_ball
-            data_type: number
-            description: "Time spent in front of the ball."
-
-          - name: positioning_time_most_back
-            data_type: number
-            description: "Time spent as the most backward player."
-
-          - name: positioning_time_most_forward
-            data_type: number
-            description: "Time spent as the most forward player."
-
-          - name: positioning_goals_against_while_last_defender
-            data_type: number
-            description: "Goals conceded while player is last defender."
-
-          - name: positioning_time_closest_to_ball
-            data_type: number
-            description: "Time spent as closest to the ball."
-
-          - name: positioning_time_farthest_from_ball
-            data_type: number
-            description: "Time spent as farthest from the ball."
-
-          - name: positioning_percent_defensive_third
-            data_type: number
-            description: "Percentage of time spent in defensive third."
-
-          - name: positioning_percent_offensive_third
-            data_type: number
-            description: "Percentage of time spent in offensive third."
-
-          - name: positioning_percent_neutral_third
-            data_type: number
-            description: "Percentage of time spent in neutral third."
-
-          - name: positioning_percent_defensive_half
-            data_type: number
-            description: "Percentage of time spent in defensive half."
-
-          - name: positioning_percent_offensive_half
-            data_type: number
-            description: "Percentage of time spent in offensive half."
-
-          - name: positioning_percent_behind_ball
-            data_type: number
-            description: "Percentage of time spent behind the ball."
-
-          - name: positioning_percent_in_front_ball
-            data_type: number
-            description: "Percentage of time spent in front of the ball."
-
-          - name: positioning_percent_most_back
-            data_type: number
-            description: "Percentage of time spent as most backward player."
-
-          - name: positioning_percent_most_forward
-            data_type: number
-            description: "Percentage of time spent as most forward player."
-
-          - name: positioning_percent_closest_to_ball
-            data_type: number
-            description: "Percentage of time spent as closest player to the ball."
-
-          - name: positioning_percent_farthest_from_ball
-            data_type: number
-            description: "Percentage of time spent as farthest player from the ball."
-
           - name: demo_inflicted
             data_type: number
             description: "Demolitions inflicted."
@@ -537,14 +345,6 @@ sources:
           - name: demo_taken
             data_type: number
             description: "Demolitions taken."
-
-          - name: advanced_goal_participation
-            data_type: number
-            description: "Goal participation rate."
-
-          - name: advanced_rating
-            data_type: number
-            description: "octane.gg performance rating."
 
           - name: advanced_mvp
             data_type: boolean
@@ -552,275 +352,34 @@ sources:
 
           - name: winner
             data_type: boolean
-            description: "Did the player win the game?"
-
-          - name: platform
-            data_type: varchar
-            description: "Player gaming platform."
-
-          - name: platform_id
-            data_type: varchar
-            description: "Platform-specific player ID."
-
-          - name: car_id
-            data_type: number
-            description: "Car ID."
-
-          - name: car_name
-            data_type: varchar
-            description: "Car name."
-
-          - name: steering_sensitivity
-            data_type: number
-            description: "Steering sensitivity."
-
-          - name: camera_fov
-            data_type: number
-            description: "Camera field of vision."
-
-          - name: camera_height
-            data_type: number
-            description: "Camera height."
-
-          - name: camera_pitch
-            data_type: number
-            description: "Camera pitch."
-
-          - name: camera_distance
-            data_type: number
-            description: "Camera distance."
-
-          - name: camera_stiffness
-            data_type: number
-            description: "Camera stiffness."
-
-          - name: camera_swivel_speed
-            data_type: number
-            description: "Camera swivel speed."
-
-          - name: camera_transition_speed
-            data_type: number
-            description: "Camera transition speed (ball cam ↔ car cam)."
-
+            description: "Did the player win?"
 
       - name: raw_games_teams
-        description: "Per team Rocket League game statistics."
+        description: "Per team Rocket League game data. Relationship between games and teams"
         columns:
           - name: game_id
-            data_type: varchar
+            data_type: string
             description: "octane.gg game ID."
 
           - name: color
-            data_type: varchar
+            data_type: string
             description: "Team color."
 
           - name: team_id
-            data_type: varchar
+            data_type: string
             description: "octane.gg team ID."
 
           - name: team_slug
-            data_type: varchar
+            data_type: string
             description: "octane.gg team URL."
 
           - name: team_name
-            data_type: varchar
+            data_type: string
             description: "Team name."
 
           - name: team_region
-            data_type: varchar
+            data_type: string
             description: "Team region."
-
-          - name: ball_possession_time
-            data_type: number
-            description: "Time spent with ball possession."
-
-          - name: ball_time_in_side
-            data_type: number
-            description: "Time spent with ball on the team's side."
-
-          - name: core_shots
-            data_type: number
-            description: "Shots on target."
-
-          - name: core_goals
-            data_type: number
-            description: "Goals."
-
-          - name: core_saves
-            data_type: number
-            description: "Saves."
-
-          - name: core_assists
-            data_type: number
-            description: "Assists (last pass before a goal)."
-
-          - name: core_score
-            data_type: number
-            description: "Sum of players' scores."
-
-          - name: core_shooting_percentage
-            data_type: number
-            description: "Goals / shots ratio."
-
-          - name: boost_bpm
-            data_type: number
-            description: "Boost collected per minute."
-
-          - name: boost_bcpm
-            data_type: number
-            description: "Boost consumed per minute."
-
-          - name: boost_avg_amount
-            data_type: number
-            description: "Average amount of boost."
-
-          - name: boost_amount_collected
-            data_type: number
-            description: "Amount of boost collected."
-
-          - name: boost_amount_stolen
-            data_type: number
-            description: "Amount of boost stolen (taken in opponent side)."
-
-          - name: boost_amount_collected_big
-            data_type: number
-            description: "Amount of boost collected from big pads."
-
-          - name: boost_amount_stolen_big
-            data_type: number
-            description: "Amount of boost stolen from big pads (taken in opponent side)."
-
-          - name: boost_amount_collected_small
-            data_type: number
-            description: "Amount of boost collected from small pads."
-
-          - name: boost_amount_stolen_small
-            data_type: number
-            description: "Amount of boost stolen from small pads (taken in opponent side)."
-
-          - name: boost_count_collected_big
-            data_type: number
-            description: "Big boost pads collected."
-
-          - name: boost_count_stolen_big
-            data_type: number
-            description: "Big boost pads stolen (taken in opponent side)."
-
-          - name: boost_count_collected_small
-            data_type: number
-            description: "Small boost pads collected."
-
-          - name: boost_count_stolen_small
-            data_type: number
-            description: "Small boost pads stolen (taken in opponent side)."
-
-          - name: boost_amount_overfill
-            data_type: number
-            description: "Amount of boost collected over the limit (over 100)."
-
-          - name: boost_amount_overfill_stolen
-            data_type: number
-            description: "Amount of boost stolen over the limit (over 100, taken in opponent side)."
-
-          - name: boost_amount_used_while_supersonic
-            data_type: number
-            description: "Amount of boost used while at supersonic speed."
-
-          - name: boost_time_zero_boost
-            data_type: number
-            description: "Time spent with no boost."
-
-          - name: boost_time_full_boost
-            data_type: number
-            description: "Time spent with full (100) boost."
-
-          - name: boost_time_boost_0_25
-            data_type: number
-            description: "Time spent with boost between 0 and 25."
-
-          - name: boost_time_boost_25_50
-            data_type: number
-            description: "Time spent with boost between 25 and 50."
-
-          - name: boost_time_boost_50_75
-            data_type: number
-            description: "Time spent with boost between 50 and 75."
-
-          - name: boost_time_boost_75_100
-            data_type: number
-            description: "Time spent with boost between 75 and 100."
-
-          - name: movement_total_distance
-            data_type: number
-            description: "Total distance traveled in the field."
-
-          - name: movement_time_supersonic_speed
-            data_type: number
-            description: "Time spent at supersonic speed."
-
-          - name: movement_time_boost_speed
-            data_type: number
-            description: "Time spent while using boost."
-
-          - name: movement_time_slow_speed
-            data_type: number
-            description: "Time spent at slow speed."
-
-          - name: movement_time_ground
-            data_type: number
-            description: "Time spent on the ground."
-
-          - name: movement_time_low_air
-            data_type: number
-            description: "Time spent low in the air."
-
-          - name: movement_time_high_air
-            data_type: number
-            description: "Time spent high in the air."
-
-          - name: movement_time_powerslide
-            data_type: number
-            description: "Powerslides total duration."
-
-          - name: movement_count_powerslide
-            data_type: number
-            description: "Total powerslides."
-
-          - name: positioning_time_defensive_third
-            data_type: number
-            description: "Time spent in defensive third."
-
-          - name: positioning_time_neutral_third
-            data_type: number
-            description: "Time spent in neutral third / midfield."
-
-          - name: positioning_time_offensive_third
-            data_type: number
-            description: "Time spent in offensive third."
-
-          - name: positioning_time_defensive_half
-            data_type: number
-            description: "Time spent in defensive half."
-
-          - name: positioning_time_offensive_half
-            data_type: number
-            description: "Time spent in offensive / opponent's half."
-
-          - name: positioning_time_behind_ball
-            data_type: number
-            description: "Time spent behind the ball."
-
-          - name: positioning_time_in_front_ball
-            data_type: number
-            description: "Time spent in front of the ball."
-
-          - name: demo_inflicted
-            data_type: number
-            description: "Demolitions inflicted."
-
-          - name: demo_taken
-            data_type: number
-            description: "Demolitions taken."
 
           - name: winner
             data_type: boolean
@@ -830,18 +389,18 @@ sources:
         description: "Standardized country lookup table derived from raw player data."
         columns:
           - name: raw_code
-            data_type: varchar
+            data_type: string
             description: "Original country code from the raw source."
           - name: country_name
-            data_type: varchar
+            data_type: string
             description: "Normalized country or subdivision name."
           - name: iso2
-            data_type: varchar
+            data_type: string
             description: "ISO-3166-1 alpha-2 code."
           - name: iso3166_2
-            data_type: varchar
+            data_type: string
             description: "ISO-3166-2 subdivision code when applicable."
           - name: continent
-            data_type: varchar
+            data_type: string
             description: "Continent associated with the country."
 

@@ -43,12 +43,15 @@ models:
       rocket_league:
         +schema: ROCKET_LEAGUE_STAGING
 
-    marts:
-      +database: "{{ env_var('DBT_ENVIRONMENTS') }}_GOLD"
-      core:
-        +schema: ROCKET_LEAGUE
+    # marts:
+    #   +database: "{{ env_var('DBT_ENVIRONMENTS') }}_GOLD"
+    #   core:
+    #     +schema: ROCKET_LEAGUE
 
 
 
 vars:
-  unknown_country_code: 'UNKNOWN'
+  unknown_country_code: 'Unknown'
+  unknown_platform: 'Unknown platform'
+
+  

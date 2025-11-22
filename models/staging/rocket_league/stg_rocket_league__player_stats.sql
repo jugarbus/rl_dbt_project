@@ -1,0 +1,99 @@
+{{
+  config(
+    materialized='view'
+  )
+}}
+
+WITH src_games_players AS (
+    SELECT * FROM {{ source('rocket_league', 'raw_games_players') }}
+),
+
+normalized AS (
+    SELECT
+        game_id::varchar AS game_id,
+        player_id::varchar AS player_id,
+        team_id::varchar as team_id, 
+        
+
+        CASE 
+            WHEN LOWER(platform::varchar) = 'psynet' THEN '{{ var("unknown_platform") }}'
+            ELSE LOWER(platform::varchar)
+        END AS platform,
+
+        car_id::varchar AS car_id,
+
+        -- BOOST
+        boost_bpm::number(38,0) AS boost_bpm,
+        boost_bcpm::number(38,4) AS boost_bcpm,
+        boost_avg_amount::number(38,4) AS boost_avg_amnt,
+        boost_amount_collected::number(38,4) AS boost_amnt_collected,
+        boost_amount_stolen::number(38,0) AS boost_amnt_stolen,
+
+        -- MOVEMENT
+        movement_avg_speed::number(38,4) AS movement_avg_speed,
+        movement_percent_slow_speed::number(38,4) AS movement_percent_slow_speed,
+        movement_percent_supersonic_speed::number(38,4) AS movement_percent_supersonic_speed,
+        movement_percent_ground::number(38,4) AS movement_percent_ground,
+        movement_percent_high_air::number(38,4) AS movement_percent_high_air,
+
+        -- POSITIONING
+        positioning_percent_defensive_third::number(38,4) AS positioning_percent_defensive_third,
+        positioning_percent_offensive_third::number(38,4) AS positioning_percent_offensive_third,
+        positioning_percent_behind_ball::number(38,4) AS positioning_percent_behind_ball,
+        positioning_percent_most_back::number(38,4) AS positioning_percent_most_back,
+        positioning_percent_most_forward::number(38,4) AS positioning_percent_most_forward,
+
+        -- CORE STATS
+        core_shots::int AS shots,
+        core_goals::int AS goals,
+        core_saves::int AS saves,
+        core_assists::int AS assists,
+
+        -- DEMOS
+        demo_inflicted::int AS demo_inflicted,
+        demo_taken::int AS demo_taken,
+
+        -- MVP
+        advanced_mvp::boolean AS is_mvp,
+
+        winner::boolean AS is_winner
+
+    FROM src_games_players
+),
+
+surrogate AS (
+    SELECT
+    {{ dbt_utils.generate_surrogate_key(['game_id', 'player_id']) }} AS game_player_id,
+    {{ dbt_utils.generate_surrogate_key(['game_id']) }} AS game_id,
+    {{ dbt_utils.generate_surrogate_key(['player_id']) }} AS player_id,
+    {{ dbt_utils.generate_surrogate_key(['team_id']) }} AS team_id, 
+    {{ dbt_utils.generate_surrogate_key(['platform']) }} AS platform_id, 
+    {{ dbt_utils.generate_surrogate_key(['car_id']) }} AS car_id,
+    boost_bpm,
+    boost_bcpm,
+    boost_avg_amnt,
+    boost_amnt_collected,
+    boost_amnt_stolen,
+    movement_avg_speed,
+    movement_percent_slow_speed,
+    movement_percent_supersonic_speed,
+    movement_percent_ground,
+    movement_percent_high_air,
+    positioning_percent_defensive_third,
+    positioning_percent_offensive_third,
+    positioning_percent_behind_ball,
+    positioning_percent_most_back,
+    positioning_percent_most_forward,
+    shots,
+    goals,
+    saves,
+    assists,
+    demo_inflicted,
+    demo_taken,
+    is_mvp,
+    is_winner
+
+    FROM normalized
+)
+
+SELECT * FROM surrogate

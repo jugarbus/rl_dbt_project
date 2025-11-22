@@ -4,7 +4,7 @@
     codegen.generate_source(
         schema_name = 'rocket_league',
         database_name = 'DEV_BRONZE',
-        table_names = ['COUNTRIES'],
+        table_names = ['raw_games_players'],
         generate_columns = True,
         include_descriptions=True,
         include_data_types=True,
