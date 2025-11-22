@@ -5,20 +5,20 @@
 WITH src_main AS (
     SELECT *
     FROM {{ source('rocket_league', 'raw_main') }}
-    -- 1. FILTRO CRÍTICO: Eliminamos filas que no son juegos
-    WHERE game_id IS NOT NULL 
-      AND TRIM(game_id::varchar) != '' -- Por si acaso hay cadenas vacías
 ),
 
-filtered AS (
+normalization AS (
     SELECT
         TRIM(match_id::varchar) AS match_id,
+        TRIM(stage) AS stage_name,
+        TRIM(stage_step) AS stage_step,
+        CONVERT_TIMEZONE('UTC', stage_start_date) AS stage_start_date_utc,
         TRIM(match_slug::varchar) AS match_slug, 
         
-        -- Corrección de formatos que vimos antes
+        -- Corrección de formatos de enfrentamientos
         CASE 
-            WHEN match_format = 'best-of-67' THEN 'best-of-7'
-            WHEN match_format = 'best-of-78' THEN 'best-of-7'
+            WHEN match_format = 'best-of-67' THEN '{{ var("match_format") }}'
+            WHEN match_format = 'best-of-78' THEN '{{ var("match_format") }}'
             ELSE match_format
         END AS match_format,
         
@@ -33,9 +33,9 @@ filtered AS (
 ),
 
 uniques AS (
-    -- 2. Deduplicación 
+    -- Deduplicación 
     SELECT *
-    FROM filtered
+    FROM normalization
     QUALIFY ROW_NUMBER() OVER (
         PARTITION BY match_id  
         ORDER BY match_date_utc DESC
@@ -45,6 +45,12 @@ uniques AS (
 surrogate AS (
     SELECT 
         {{ dbt_utils.generate_surrogate_key(["match_id"]) }} AS match_id,
+        --Generamos la PK única del Stage
+        {{ dbt_utils.generate_surrogate_key([
+            'stage_name', 
+            'stage_start_date_utc', 
+            'stage_step'
+        ]) }} AS stage_id,
         match_slug,
         match_number,
         {{ dbt_utils.generate_surrogate_key(["match_round"]) }} AS match_round_id,
@@ -52,7 +58,6 @@ surrogate AS (
         {{ dbt_utils.generate_surrogate_key(["match_format"]) }} AS match_format_id,
         reverse_sweep_attempt,
         reverse_sweep
-            -- METER STAGE_ID
 
     FROM uniques
 )

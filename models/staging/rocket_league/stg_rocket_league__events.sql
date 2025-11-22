@@ -1,33 +1,71 @@
-{{
-  config(
+{{ config(
     materialized='view'
-  )
-}}
+) }}
 
 WITH src_main AS (
-    SELECT * 
-    FROM {{ source('rocket_league', 'raw_main') }}
+    SELECT * FROM {{ source('rocket_league', 'raw_main') }}
 ),
 
-normalized AS (
-    SELECT DISTINCT
-        event_id::varchar AS event_id, -- salen duplicados igualmente (no se ha captado el grano)
-        event::varchar AS event_descr,
-        event_split::varchar AS event_split,
-        event_region::varchar AS event_region,
-        CONVERT_TIMEZONE('UTC', event_start_date) AS event_start_date_utc, 
-        CONVERT_TIMEZONE('UTC', event_end_date) AS event_end_date_utc
-        event_tier::varchar AS event_tier, -- No esta a grano de event_id. Hay duplicados justamente 2 por event_id
-        event_phase::varchar AS event_phase, -- No esta a grano de event_id. Hay duplicados justamente 2 y 3 por event_id
-        prize_money::number(38,4),
-        {{ dbt_utils.generate_surrogate_key(['location_venue']) }} AS location_id, -- cambiar id de location. hay un registro un event_id con dos distintos location_venue distintas
-        liquipedia_link::varchar AS liquipedia_link
+-- 1. Limpieza básica (Quitamos el DISTINCT aquí porque es peligroso con datos variables)
+cleaned_data AS (
+    SELECT 
+        TRIM(event_id::varchar) AS event_natural_key,
+        
+        -- Atributos de texto
+        TRIM(event::varchar) AS event_name,
+        TRIM(event_region::varchar) AS event_region,
+        TRIM(event_slug::varchar) AS event_slug,
+        TRIM(event_tier::varchar) AS event_tier,
+        
+        -- Limpieza de la fase (parte de la clave)
+        LOWER(TRIM(COALESCE(event_phase::varchar, 'unknown'))) AS event_phase_clean,
+        TRIM(event_phase::varchar) AS event_phase_display,
+
+        -- Fechas
+        CONVERT_TIMEZONE('UTC', event_start_date) AS event_start_date_utc,
+        CONVERT_TIMEZONE('UTC', event_end_date) AS event_end_date_utc,
+        
+        -- Aseguramos que el dinero sea numérico y convertimos nulos a 0 para poder ordenar
+        COALESCE(prize_money::numeric(18,2), 0) AS prize_money,
+        
+        TRIM(liquipedia_link::varchar) AS liquipedia_link
+
     FROM src_main
+    WHERE event_id IS NOT NULL
+),
+
+-- 2. Deduplicación Inteligente ("El dinero máximo manda")
+deduplicated AS (
+    SELECT *
+    FROM cleaned_data
+    -- Agrupamos por los campos que definen la CLAVE (ID  + Fase).
+    -- Ordenamos por prize_money DESC (el mayor arriba).
+    -- Nos quedamos solo con el primero (= 1).
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY event_natural_key, event_tier, event_phase_clean 
+        ORDER BY prize_money DESC, event_start_date_utc DESC
+    ) = 1
+),
+
+final AS (
+    SELECT
+        -- Generamos la SK basada en los datos YA deduplicados
+        {{ dbt_utils.generate_surrogate_key([
+            'event_natural_key', 
+            'event_phase_clean'
+        ]) }} AS event_id,
+
+        event_natural_key AS event_nk,
+        event_name,
+        event_region,
+        event_slug,
+        event_start_date_utc,
+        event_end_date_utc,
+        event_tier,
+        event_phase_display AS event_phase,
+        prize_money,
+        liquipedia_link
+    FROM deduplicated
 )
 
-SELECT * 
-FROM normalized
-
-
-
-
+SELECT * FROM final

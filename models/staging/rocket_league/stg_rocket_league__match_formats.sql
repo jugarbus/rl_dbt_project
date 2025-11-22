@@ -11,8 +11,8 @@ cleaned_formats AS (
     -- PASO 1: Limpiar los tipos y normalizar textos
     SELECT 
         CASE 
-            WHEN match_format = 'best-of-67' THEN 'best-of-7'
-            WHEN match_format = 'best-of-78' THEN 'best-of-7'
+            WHEN match_format = 'best-of-67' THEN '{{ var("match_format") }}'
+            WHEN match_format = 'best-of-78' THEN '{{ var("match_format") }}'
             ELSE match_format
         END AS match_format_clean
     FROM src_main
