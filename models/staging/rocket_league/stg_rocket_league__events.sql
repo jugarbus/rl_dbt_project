@@ -6,15 +6,17 @@ WITH src_main AS (
     SELECT * FROM {{ source('rocket_league', 'raw_main') }}
 ),
 
--- 1. Limpieza básica (Quitamos el DISTINCT aquí porque es peligroso con datos variables)
+-- 1. Limpieza básica 
 cleaned_data AS (
     SELECT 
         TRIM(event_id::varchar) AS event_natural_key,
         
         -- Atributos de texto
         TRIM(event::varchar) AS event_name,
-        TRIM(event_region::varchar) AS event_region,
-        TRIM(event_slug::varchar) AS event_slug,
+        TRIM(event_split::varchar) AS event_split,
+
+        COALESCE(TRIM(event_region), '{{ var("unknown_country_code") }}')::varchar AS event_region_clean,
+
         TRIM(event_tier::varchar) AS event_tier,
         
         -- Limpieza de la fase (parte de la clave)
@@ -57,8 +59,8 @@ final AS (
 
         event_natural_key AS event_nk,
         event_name,
-        event_region,
-        event_slug,
+        event_split,
+        event_region_clean AS event_region,
         event_start_date_utc,
         event_end_date_utc,
         event_tier,

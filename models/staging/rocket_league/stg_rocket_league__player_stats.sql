@@ -20,7 +20,7 @@ normalized AS (
             ELSE LOWER(platform::varchar)
         END AS platform,
 
-        car_id::varchar AS car_id,
+        car_name::varchar AS car_name,
 
         -- BOOST
         boost_bpm::number(38,0) AS boost_bpm,
@@ -68,7 +68,7 @@ surrogate AS (
     {{ dbt_utils.generate_surrogate_key(['player_id']) }} AS player_id,
     {{ dbt_utils.generate_surrogate_key(['team_id']) }} AS team_id, 
     {{ dbt_utils.generate_surrogate_key(['platform']) }} AS platform_id, 
-    {{ dbt_utils.generate_surrogate_key(['car_id']) }} AS car_id,
+    {{ dbt_utils.generate_surrogate_key(['car_name']) }} AS car_id,
     boost_bpm,
     boost_bcpm,
     boost_avg_amnt,

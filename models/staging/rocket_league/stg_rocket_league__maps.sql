@@ -9,7 +9,7 @@ WITH src_main AS (
 
 normalize AS (
     SELECT DISTINCT
-        {{ dbt_utils.generate_surrogate_key(["TRIM(map_id::varchar)"]) }} AS map_id,   
+        {{ dbt_utils.generate_surrogate_key(["TRIM(map_name::varchar)"]) }} AS map_id,   
         TRIM(map_name::varchar) AS map_name
             FROM src_main
             WHERE game_id IS NOT NULL       

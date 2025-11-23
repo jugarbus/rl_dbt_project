@@ -15,7 +15,7 @@ filtered AS (
         game_number::int as game_number,
         CONVERT_TIMEZONE('UTC', game_date) AS game_date_utc, 
         game_duration::int AS game_duration_secs,
-        TRIM(map_id::varchar) AS map_id, 
+        TRIM(map_name::varchar) AS map_name, 
         overtime    
         FROM src_main
     WHERE game_id IS NOT NULL
@@ -29,7 +29,7 @@ uniques AS (
         game_number,
         game_date_utc,
         game_duration_secs,
-        map_id,         
+        map_name,         
         overtime
     FROM filtered
 ),
@@ -39,9 +39,9 @@ surrogate AS (
         {{ dbt_utils.generate_surrogate_key(['game_id']) }} AS game_id,
         {{ dbt_utils.generate_surrogate_key(['match_id']) }} AS match_id,
         game_number,
-        game_date_utc,
+        game_date_utc, 
         game_duration_secs,
-        {{ dbt_utils.generate_surrogate_key(['map_id']) }} AS map_id,
+        {{ dbt_utils.generate_surrogate_key(['map_name']) }} AS map_id,
         overtime
     FROM uniques
 

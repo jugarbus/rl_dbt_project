@@ -1,0 +1,32 @@
+{% macro generate_lookup_dim(source_name, table_name, source_column, id_alias, name_alias) %}
+
+WITH src_data AS (
+    SELECT * FROM {{ source(source_name, table_name) }}
+),
+
+distinct_values AS (
+    SELECT DISTINCT
+        TRIM(
+            COALESCE(
+                -- 1. Primero convertimos cadenas vacías '' en NULLs reales para atraparlos también
+                NULLIF({{ source_column }}::varchar, ''),
+                -- 2. Si es NULL (o era vacío), usamos tu variable de proyecto
+                '{{ var("unknown_country_code", "Unknown") }}'
+            )
+        ) AS clean_value
+    FROM src_data
+),
+
+final AS (
+    SELECT
+        -- Generamos la Surrogate Key sobre el valor limpio (ahora incluyendo 'Unknown')
+        {{ dbt_utils.generate_surrogate_key(['clean_value']) }} AS {{ id_alias }},
+        
+        -- El nombre limpio
+        clean_value AS {{ name_alias }}
+    FROM distinct_values
+)
+
+SELECT * FROM final
+
+{% endmacro %}
