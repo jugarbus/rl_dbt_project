@@ -9,9 +9,8 @@ distinct_values AS (
     LOWER(
         TRIM(
             COALESCE(
-                -- 1. Primero convertimos cadenas vacías '' en NULLs reales para atraparlos también
-                NULLIF({{ source_column }}::varchar, ''),
-                -- 2. Si es NULL (o era vacío), usamos tu variable de proyecto
+                -- Si es NULL, usamos tu variable de proyecto
+                {{ source_column }}::varchar,
                 '{{ var("unknown_country_code", "Unknown") }}'
             )
         )

@@ -51,7 +51,7 @@ models:
 
 
 vars:
-  unknown_country_code: 'Unknown'
+  unknown_var: 'unknown'
   unknown_platform: 'Unknown platform'
   match_format: 'best-of-7'
 

@@ -12,16 +12,11 @@ cleaned_data AS (
         LOWER(TRIM(event_id::varchar)) AS event_natural_key,
         
         -- Atributos de texto
-        LOWER(TRIM(event::varchar)) AS event_name,
-        LOWER(TRIM(event_split::varchar)) AS event_split,
-
-        LOWER(COALESCE(TRIM(event_region::varchar), '{{ var("unknown_country_code") }}')) AS event_region_clean,
-
-        LOWER(TRIM(event_tier::varchar)) AS event_tier,
-        
-        -- Limpieza de la fase (parte de la clave)
-        LOWER(TRIM(COALESCE(event_phase::varchar, '{{ var("unknown_country_code") }}'))) AS event_phase_clean,
-        LOWER(TRIM(event_phase::varchar)) AS event_phase_display,
+        LOWER(COALESCE(TRIM(event::varchar), '{{ var("unknown_var") }}')) AS event_name_clean,
+        LOWER(COALESCE(TRIM(event_split::varchar), '{{ var("unknown_var") }}')) AS event_split_clean,
+        LOWER(COALESCE(TRIM(event_region::varchar), '{{ var("unknown_var") }}')) AS event_region_clean,
+        LOWER(COALESCE(TRIM(event_tier::varchar), '{{ var("unknown_var") }}')) AS event_tier_clean,
+        LOWER(TRIM(COALESCE(event_phase::varchar, '{{ var("unknown_var") }}'))) AS event_phase_clean,
 
         -- Fechas
         CONVERT_TIMEZONE('UTC', event_start_date) AS event_start_date_utc,
@@ -36,7 +31,7 @@ cleaned_data AS (
     WHERE event_id IS NOT NULL
 ),
 
--- 2. Deduplicación Inteligente ("El dinero máximo manda")
+-- 2. Deduplicación Inteligente por dinero máximo
 deduplicated AS (
     SELECT *
     FROM cleaned_data
@@ -44,7 +39,7 @@ deduplicated AS (
     -- Ordenamos por prize_money DESC (el mayor arriba).
     -- Nos quedamos solo con el primero (= 1).
     QUALIFY ROW_NUMBER() OVER (
-        PARTITION BY event_natural_key, event_tier, event_phase_clean 
+        PARTITION BY event_natural_key, event_tier_clean, event_phase_clean 
         ORDER BY prize_money DESC, event_start_date_utc DESC
     ) = 1
 ),
@@ -56,15 +51,14 @@ final AS (
             'event_natural_key', 
             'event_phase_clean'
         ]) }} AS event_id,
-
         event_natural_key AS event_nk,
-        event_name,
-        event_split,
-        event_region_clean AS event_region,
+        {{ dbt_utils.generate_surrogate_key(['event_name_clean']) }} AS event_name_id,
+        {{ dbt_utils.generate_surrogate_key(['event_split_clean']) }} AS event_split_id,
+        {{ dbt_utils.generate_surrogate_key(['event_region_clean']) }}  AS event_region_id, 
         event_start_date_utc,
         event_end_date_utc,
-        event_tier,
-        event_phase_display AS event_phase,
+        {{ dbt_utils.generate_surrogate_key(['event_tier_clean']) }}  AS event_tier_id, 
+        {{ dbt_utils.generate_surrogate_key(['event_phase_clean']) }}  AS event_phase_id, 
         prize_money,
         liquipedia_link
     FROM deduplicated

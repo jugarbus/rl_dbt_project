@@ -10,26 +10,28 @@ WITH src_main AS (
 normalization AS (
     SELECT
         LOWER(TRIM(match_id::varchar)) AS match_id_clean,
-        LOWER(TRIM(stage)) AS stage_name_clean,
-        LOWER(TRIM(stage_step)) AS stage_step_clean,
+        -- Para hacer surrogated key de stage
+        LOWER(COALESCE(TRIM(stage),'{{ var("unknown_var")}}' )) AS stage_name_clean,
+        stage_step::int AS stage_step_clean,
         CONVERT_TIMEZONE('UTC', stage_start_date) AS stage_start_date_utc,
+
+
         TRIM(match_slug::varchar) AS match_url_clean, 
         
         -- Corrección de formatos de enfrentamientos
-        LOWER(TRIM(
-        CASE 
-            WHEN match_format = 'best-of-67' THEN '{{ var("match_format") }}'
-            WHEN match_format = 'best-of-78' THEN '{{ var("match_format") }}'
-            ELSE match_format
-        END
-         ))::varchar AS match_format_clean,
+        LOWER(COALESCE(TRIM(
+            CASE 
+                WHEN match_format = 'best-of-67' THEN '{{ var("match_format") }}'
+                WHEN match_format = 'best-of-78' THEN '{{ var("match_format") }}'
+                ELSE match_format
+            END::varchar
+        ), '{{ var("unknown_var") }}')) AS match_format_clean,
         
         match_number::int as match_number,
-        LOWER(TRIM(match_round::varchar)) AS match_round_clean, 
+        LOWER(COALESCE(TRIM(match_round),'{{ var("unknown_var")}}' )) AS match_round_clean, 
         CONVERT_TIMEZONE('UTC', match_date) AS match_date_utc, 
-        
-        COALESCE(reverse_sweep_attempt, FALSE) AS reverse_sweep_attempt_clean, 
-        COALESCE(reverse_sweep, FALSE) AS reverse_sweep_clean
+        COALESCE(reverse_sweep_attempt::boolean, FALSE) AS reverse_sweep_attempt_clean, 
+        COALESCE(reverse_sweep::boolean, FALSE) AS reverse_sweep_clean
 
     FROM src_main
 ),

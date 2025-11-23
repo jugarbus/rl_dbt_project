@@ -20,6 +20,9 @@ sources:
           - name: player_id
             data_type: string
             description: "octane.gg player ID. MongoDB ObjectId created Octane.gg"
+            tests:
+              - unique
+              - not_null
 
           - name: player_slug
             data_type: string
@@ -45,6 +48,8 @@ sources:
           - name: event_id
             data_type: string
             description: "octane.gg event ID (MongoDB idObject)."
+            tests: 
+              - not_null
 
           - name: event
             data_type: string
@@ -63,11 +68,11 @@ sources:
             description: "octane.gg event URL."
 
           - name: event_start_date
-            data_type: timestamp_tz
+            data_type: string
             description: "Event start date."
 
           - name: event_end_date
-            data_type: timestamp_tz
+            data_type: string
             description: "Event end date."
 
           - name: event_tier
@@ -79,11 +84,13 @@ sources:
             description: "Event phase."
 
           - name: prize_money
-            data_type: float
+            data_type: string
             description: "Event prize money (not phase prize money)."
+            tests:
+              - is_non_negative
 
           - name: stage_step
-            data_type: number
+            data_type: string
             description: "Stage step in event phase."
 
           - name: stage
@@ -91,11 +98,11 @@ sources:
             description: "Stage name."
 
           - name: stage_start_date
-            data_type: timestamp_tz
+            data_type: string
             description: "Stage start date."
 
           - name: stage_end_date
-            data_type: timestamp_tz
+            data_type: string
             description: "Stage end date."
 
           - name: stage_is_lan
@@ -125,13 +132,15 @@ sources:
           - name: match_id
             data_type: string
             description: "octane.gg match ID."
+            tests:
+              - not_null            
 
           - name: match_slug
             data_type: string
             description: "octane.gg match URL."
 
           - name: match_number
-            data_type: number
+            data_type: string
             description: "Match number during stage."
 
           - name: match_round
@@ -139,7 +148,7 @@ sources:
             description: "Match round during stage."
 
           - name: match_date
-            data_type: timestamp_tz
+            data_type: string
             description: "Match date."
 
           - name: match_format
@@ -159,16 +168,20 @@ sources:
             description: "octane.gg game ID."
 
           - name: game_number
-            data_type: number
+            data_type: string
             description: "Game number in match."
+            tests:
+              - is_non_negative
 
           - name: game_date
-            data_type: timestamp_tz
+            data_type: string
             description: "Game date."
 
           - name: game_duration
-            data_type: number
+            data_type: string
             description: "Game duration."
+            tests:
+              - is_non_negative
 
           - name: map_id
             data_type: string
@@ -193,14 +206,20 @@ sources:
           - name: game_id
             data_type: string
             description: "octane.gg game ID. MongoDB objectID"
+            tests:
+              - not_null
 
           - name: player_id
             data_type: string
             description: "octane.gg player ID."
+            tests:
+              - not_null
 
           - name: team_id
             data_type: string
             description: "octane.gg team ID."
+            tests:
+              - not_null
 
           - name: platform_id
             data_type: string
@@ -211,7 +230,7 @@ sources:
             description: "Player gaming platform."
 
           - name: car_id
-            data_type: number
+            data_type: string
             description: "Car ID."
 
           - name: car_name
@@ -219,140 +238,209 @@ sources:
             description: "Car name."
 
           - name: boost_bpm
-            data_type: float
+            data_type: string
             description: "Boost collected per minute."
+            tests:
+              - is_non_negative
 
           - name: boost_bcpm
-            data_type: float
+            data_type: string
             description: "Boost consumed per minute."
+            tests:
+              - is_non_negative
 
           - name: boost_avg_amount
-            data_type: float
+            data_type: string
             description: "Average amount of boost."
+            tests:
+              - is_non_negative
 
           - name: boost_amount_collected
-            data_type: float
+            data_type: string
             description: "Amount of boost collected."
+            tests:
+              - is_non_negative
 
           - name: boost_amount_stolen
-            data_type: float
+            data_type: string
             description: "Amount of boost stolen (taken on opponent side)."
+            tests:
+              - is_non_negative
 
           - name: boost_amount_used_while_supersonic
-            data_type: float
+            data_type: string
             description: "Amount of boost used while at supersonic speed."
+            tests:
+              - is_non_negative
 
           - name: boost_percent_zero_boost
-            data_type: float
+            data_type: string
             description: "Percentage of time spent with no boost."
+            tests:
+              - is_percentage
 
           - name: boost_percent_full_boost
-            data_type: float
+            data_type: string
             description: "Percentage of time spent with full boost."
+            tests:
+              - is_percentage
 
           - name: positioning_avg_distance_to_ball
-            data_type: float
+            data_type: string
             description: "Average distance to the ball."
+            tests:
+              - is_non_negative
 
           - name: positioning_avg_distance_to_mates
-            data_type: float
+            data_type: string
             description: "Average distance to teammates."
+            tests:
+              - is_non_negative
 
           - name: positioning_goals_against_while_last_defender
-            data_type: float
+            data_type: string
             description: "Goals conceded while the player is last defender."
+            tests:
+              - is_non_negative
 
           - name: positioning_percent_defensive_third
-            data_type: float
+            data_type: string
             description: "Percentage of time spent in defensive third."
+            tests:
+              - is_percentage
 
           - name: positioning_percent_offensive_third
-            data_type: float
+            data_type: string
             description: "Percentage of time spent in offensive third."
+            tests:
+              - is_percentage
 
           - name: positioning_percent_behind_ball
-            data_type: float
+            data_type: string
             description: "Percentage of time spent behind the ball."
+            tests:
+              - is_percentage
 
           - name: positioning_percent_most_back
-            data_type: float
+            data_type: string
             description: "Percentage of time spent as most backward player."
+            tests:
+              - is_percentage
 
           - name: positioning_percent_most_forward
-            data_type: float
+            data_type: string
             description: "Percentage of time spent as most forward player."
+            tests:
+              - is_percentage
 
           - name: positioning_percent_closest_to_ball
-            data_type: float
+            data_type: string
             description: "Percentage of time spent as closest player to the ball."
+            tests:
+              - is_percentage
 
           - name: positioning_percent_farthest_from_ball
-            data_type: float
+            data_type: string
             description: "Percentage of time spent as farthest player from the ball."
+            tests:
+              - is_percentage
 
           - name: movement_avg_speed
-            data_type: float
+            data_type: string
             description: "Average speed."
+            tests:
+              - is_non_negative
 
           - name: movement_avg_speed_percentage
-            data_type: float
+            data_type: string
             description: "Average speed as percentage of max reachable speed."
+            tests:
+              - is_percentage
+            
 
           - name: movement_time_powerslide
-            data_type: float
+            data_type: string
             description: "Total powerslide duration."
+            tests:
+              - is_non_negative
 
           - name: movement_count_powerslide
-            data_type: float
-            description: "Total number of powerslides."
+            data_type: string
+            description: "Total string of powerslides."
 
           - name: movement_percent_slow_speed
-            data_type: float
+            data_type: string
             description: "Percentage of time spent at slow speed."
+            tests:
+              - is_percentage
 
           - name: movement_percent_supersonic_speed
-            data_type: float
+            data_type: string
             description: "Percentage of time spent at supersonic speed."
+            tests:
+              - is_percentage
 
           - name: movement_percent_ground
-            data_type: float
+            data_type: string
             description: "Percentage of time spent on the ground."
+            tests:
+              - is_percentage
 
           - name: movement_percent_high_air
-            data_type: float
+            data_type: string
             description: "Percentage of time spent high in the air."
+            tests:
+              - is_percentage
 
           - name: core_shots
-            data_type: number
+            data_type: string
             description: "Shots on target."
+            tests:
+              - is_non_negative
 
           - name: core_goals
-            data_type: number
+            data_type: string
             description: "Goals scored."
+            tests:
+              - is_non_negative
 
           - name: core_saves
-            data_type: number
+            data_type: string
             description: "Saves."
+            tests:
+              - is_non_negative
 
           - name: core_assists
-            data_type: number
+            data_type: string
             description: "Assists (last pass before a goal)."
+            tests:
+              - is_non_negative
 
           - name: demo_inflicted
-            data_type: number
+            data_type: string
             description: "Demolitions inflicted."
+            tests:
+              - is_non_negative
 
           - name: demo_taken
-            data_type: number
+            data_type: string
             description: "Demolitions taken."
+            tests:
+              - is_non_negative
 
           - name: advanced_mvp
             data_type: boolean
             description: "Was the player the game MVP?"
+            
 
           - name: winner
             data_type: boolean
             description: "Did the player win?"
+
+          - name: data_load
+            data_type: timestamp_tz
+            description: "Date when the data was load"
+
 
       - name: raw_games_teams
         description: "Per team Rocket League game data. Relationship between games and teams"
@@ -360,14 +448,14 @@ sources:
           - name: game_id
             data_type: string
             description: "octane.gg game ID."
-
-          - name: color
-            data_type: string
-            description: "Team color."
+            tests:
+              - not_null
 
           - name: team_id
             data_type: string
             description: "octane.gg team ID."
+            tests:
+              - not_null
 
           - name: team_slug
             data_type: string
@@ -391,15 +479,21 @@ sources:
           - name: raw_code
             data_type: string
             description: "Original country code from the raw source."
+            tests:
+              - unique
+
           - name: country_name
             data_type: string
             description: "Normalized country or subdivision name."
+
           - name: iso2
             data_type: string
             description: "ISO-3166-1 alpha-2 code."
+
           - name: iso3166_2
             data_type: string
             description: "ISO-3166-2 subdivision code when applicable."
+
           - name: continent
             data_type: string
             description: "Continent associated with the country."

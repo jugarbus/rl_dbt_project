@@ -11,9 +11,9 @@ WITH src_countries AS (
 
 normalized AS (
     SELECT
-        LOWER(COALESCE(TRIM(raw_code), '{{ var("unknown_country_code") }}'))::varchar AS raw_code_clean,
-        LOWER(COALESCE(TRIM(country_name),'{{ var("unknown_country_code") }}'))::varchar AS country_name_clean,
-        LOWER(COALESCE(TRIM(continent),'{{ var("unknown_country_code") }}'))::varchar AS continent_clean
+        LOWER(COALESCE(TRIM(raw_code::varchar), '{{ var("unknown_var") }}')) AS raw_code_clean,
+        LOWER(COALESCE(TRIM(country_name::varchar),'{{ var("unknown_var") }}')) AS country_name_clean,
+        LOWER(COALESCE(TRIM(continent::varchar),'{{ var("unknown_var") }}')) AS continent_clean
     FROM src_countries
 ),
 

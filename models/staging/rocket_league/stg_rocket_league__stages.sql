@@ -11,18 +11,18 @@ WITH src_main AS (
 unique_stages AS (
     -- 1. Seleccionamos solo las columnas de Stage y eliminamos duplicados
 SELECT DISTINCT
-    LOWER(TRIM(stage::varchar)) AS stage_name_clean,
-    LOWER(TRIM(stage_step::varchar)) AS stage_step_clean,
+    LOWER(COALESCE(TRIM(stage::varchar), '{{ var("unknown_var") }}')) AS stage_name_clean,
+    stage_step::int AS stage_step_clean,
     CONVERT_TIMEZONE('UTC', stage_start_date) AS stage_start_date_utc,
     CONVERT_TIMEZONE('UTC', stage_end_date) AS stage_end_date_utc,
-    stage_is_lan,
-    stage_is_qualifier,
+    stage_is_lan::boolean AS stage_is_lan,
+    stage_is_qualifier::boolean AS stage_is_qualifier,
 
 
-    -- Datos para construir la FK del Evento (Ingredientes)
+    -- Datos para construir la FK del Evento
         LOWER(TRIM(event_id::varchar)) AS event_natural_key_clean,
         -- Limpieza idéntica a la tabla de eventos:
-        LOWER(TRIM(COALESCE(event_phase::varchar, 'Unknown'))) AS event_phase_clean
+        LOWER(TRIM(COALESCE(event_phase::varchar, '{{ var("unknown_var") }}'))) AS event_phase_clean
 
 FROM src_main
 
@@ -30,7 +30,7 @@ FROM src_main
 
 final AS (
     SELECT
-        -- 2. Generamos la PK única del Stage
+        -- 2. Generamos la SK  del Stage
         {{ dbt_utils.generate_surrogate_key([
             'stage_name_clean', 
             'stage_start_date_utc', 
@@ -48,7 +48,7 @@ final AS (
 
 
         -- Campos informativos
-        stage_step_clean,
+        stage_step_clean AS stage_step,
         stage_start_date_utc,
         stage_end_date_utc,
         stage_is_lan,

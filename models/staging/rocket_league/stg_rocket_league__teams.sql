@@ -13,8 +13,8 @@ normalized AS (
     SELECT DISTINCT
         LOWER(TRIM(team_id::varchar)) AS team_id_clean,
         TRIM(team_slug::varchar) AS team_url_clean,
-        LOWER(TRIM(team_name::varchar)) AS team_name_clean,
-    LOWER(COALESCE(TRIM(team_region::varchar), '{{ var("unknown_country_code") }}')) AS team_region_clean
+        TRIM(team_name::varchar) AS team_name_clean,
+        LOWER(COALESCE(TRIM(team_region::varchar), '{{ var("unknown_var") }}')) AS team_region_clean
 
     FROM src_games_teams
 ),

@@ -2,20 +2,10 @@
     materialized='view'
 ) }}
 
-WITH src_main AS (
-    SELECT *
-    FROM {{ source('rocket_league', 'raw_main') }}
-),
-
-normalize AS (
-    SELECT DISTINCT
-        {{ dbt_utils.generate_surrogate_key(["LOWER(TRIM(map_name::varchar))"]) }} AS map_id,   
-        LOWER(TRIM(map_name::varchar)) AS map_name
-            FROM src_main
-            WHERE game_id IS NOT NULL       
-
-)
-
-SELECT *
-FROM normalize
-
+{{ generate_lookup_dim(
+    source_name='rocket_league',
+    table_name='raw_main',
+    source_column='map_name',
+    id_alias='map_id',
+    name_alias='map_name'
+) }}
