@@ -11,7 +11,7 @@ WITH src_games_teams AS (
 
 normalized AS (
     SELECT DISTINCT
-    COALESCE(TRIM(event_region), '{{ var("unknown_country_code") }}')::varchar AS event_region_clean
+    LOWER(COALESCE(TRIM(event_region), '{{ var("unknown_country_code") }}'))::varchar AS event_region_clean
 
     FROM src_games_teams
 ),

@@ -10,17 +10,18 @@ WITH src_games_players AS (
 
 normalized AS (
     SELECT
-        game_id::varchar AS game_id,
-        player_id::varchar AS player_id,
-        team_id::varchar as team_id, 
+        LOWER(TRIM(game_id::varchar)) AS game_id_clean,
+        LOWER(TRIM(player_id::varchar)) AS player_id_clean,
+        LOWER(TRIM(team_id::varchar)) AS team_id_clean,
         
-
+    LOWER(TRIM(
         CASE 
             WHEN LOWER(platform::varchar) = 'psynet' THEN '{{ var("unknown_platform") }}'
             ELSE LOWER(platform::varchar)
-        END AS platform,
+        END 
+    ))AS platform_clean,
 
-        car_name::varchar AS car_name,
+        LOWER(TRIM(car_name::varchar)) AS car_name_clean,
 
         -- BOOST
         boost_bpm::number(38,0) AS boost_bpm,
@@ -63,12 +64,12 @@ normalized AS (
 
 surrogate AS (
     SELECT
-    {{ dbt_utils.generate_surrogate_key(['game_id', 'player_id']) }} AS game_player_id,
-    {{ dbt_utils.generate_surrogate_key(['game_id']) }} AS game_id,
-    {{ dbt_utils.generate_surrogate_key(['player_id']) }} AS player_id,
-    {{ dbt_utils.generate_surrogate_key(['team_id']) }} AS team_id, 
-    {{ dbt_utils.generate_surrogate_key(['platform']) }} AS platform_id, 
-    {{ dbt_utils.generate_surrogate_key(['car_name']) }} AS car_id,
+    {{ dbt_utils.generate_surrogate_key(['game_id_clean', 'player_id_clean']) }} AS game_player_id,
+    {{ dbt_utils.generate_surrogate_key(['game_id_clean']) }} AS game_id,
+    {{ dbt_utils.generate_surrogate_key(['player_id_clean']) }} AS player_id,
+    {{ dbt_utils.generate_surrogate_key(['team_id_clean']) }} AS team_id, 
+    {{ dbt_utils.generate_surrogate_key(['platform_clean']) }} AS platform_id, 
+    {{ dbt_utils.generate_surrogate_key(['car_name_clean']) }} AS car_id,
     boost_bpm,
     boost_bcpm,
     boost_avg_amnt,

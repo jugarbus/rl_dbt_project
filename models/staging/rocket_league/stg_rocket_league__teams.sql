@@ -11,20 +11,20 @@ WITH src_games_teams AS (
 
 normalized AS (
     SELECT DISTINCT
-        TRIM(team_id)::varchar AS team_id,
-        TRIM(team_slug)::varchar AS team_slug,
-        TRIM(team_name)::varchar AS team_name,
-    COALESCE(TRIM(team_region), '{{ var("unknown_country_code") }}')::varchar AS team_region_clean
+        LOWER(TRIM(team_id::varchar)) AS team_id_clean,
+        TRIM(team_slug::varchar) AS team_url_clean,
+        LOWER(TRIM(team_name::varchar)) AS team_name_clean,
+    LOWER(COALESCE(TRIM(team_region::varchar), '{{ var("unknown_country_code") }}')) AS team_region_clean
 
     FROM src_games_teams
 ),
 
 surrogate AS (
     SELECT
-        {{ dbt_utils.generate_surrogate_key(['team_id']) }} AS team_id,
-        team_slug,
-        team_name,
-        {{ dbt_utils.generate_surrogate_key(['team_region_clean']) }}::varchar AS team_region_id
+        {{ dbt_utils.generate_surrogate_key(['team_id_clean']) }} AS team_id,
+        team_url_clean AS team_url,
+        team_name_clean AS team_name,
+        {{ dbt_utils.generate_surrogate_key(['team_region_clean']) }} AS team_region_id
     FROM normalized
 )
 

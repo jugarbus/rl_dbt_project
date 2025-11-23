@@ -6,6 +6,7 @@ WITH src_data AS (
 
 distinct_values AS (
     SELECT DISTINCT
+    LOWER(
         TRIM(
             COALESCE(
                 -- 1. Primero convertimos cadenas vacías '' en NULLs reales para atraparlos también
@@ -13,7 +14,8 @@ distinct_values AS (
                 -- 2. Si es NULL (o era vacío), usamos tu variable de proyecto
                 '{{ var("unknown_country_code", "Unknown") }}'
             )
-        ) AS clean_value
+        )
+     ) AS clean_value
     FROM src_data
 ),
 

@@ -9,12 +9,13 @@ WITH src_games_players AS (
 
 filtered AS (
     SELECT DISTINCT
+    LOWER(TRIM(
         CASE 
             WHEN LOWER(platform) = 'psynet' THEN '{{ var("unknown_platform") }}'
             ELSE LOWER(platform)
-        END AS platform
+        END
+     ))::varchar AS platform
     FROM src_games_players
-    WHERE platform IS NOT NULL
 ),
 
 surrogated_key AS (

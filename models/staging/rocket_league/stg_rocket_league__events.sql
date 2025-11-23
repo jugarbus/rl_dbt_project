@@ -9,26 +9,26 @@ WITH src_main AS (
 -- 1. Limpieza básica 
 cleaned_data AS (
     SELECT 
-        TRIM(event_id::varchar) AS event_natural_key,
+        LOWER(TRIM(event_id::varchar)) AS event_natural_key,
         
         -- Atributos de texto
-        TRIM(event::varchar) AS event_name,
-        TRIM(event_split::varchar) AS event_split,
+        LOWER(TRIM(event::varchar)) AS event_name,
+        LOWER(TRIM(event_split::varchar)) AS event_split,
 
-        COALESCE(TRIM(event_region), '{{ var("unknown_country_code") }}')::varchar AS event_region_clean,
+        LOWER(COALESCE(TRIM(event_region::varchar), '{{ var("unknown_country_code") }}')) AS event_region_clean,
 
-        TRIM(event_tier::varchar) AS event_tier,
+        LOWER(TRIM(event_tier::varchar)) AS event_tier,
         
         -- Limpieza de la fase (parte de la clave)
-        LOWER(TRIM(COALESCE(event_phase::varchar, 'unknown'))) AS event_phase_clean,
-        TRIM(event_phase::varchar) AS event_phase_display,
+        LOWER(TRIM(COALESCE(event_phase::varchar, '{{ var("unknown_country_code") }}'))) AS event_phase_clean,
+        LOWER(TRIM(event_phase::varchar)) AS event_phase_display,
 
         -- Fechas
         CONVERT_TIMEZONE('UTC', event_start_date) AS event_start_date_utc,
         CONVERT_TIMEZONE('UTC', event_end_date) AS event_end_date_utc,
         
         -- Aseguramos que el dinero sea numérico y convertimos nulos a 0 para poder ordenar
-        COALESCE(prize_money::numeric(18,2), 0) AS prize_money,
+        LOWER(COALESCE(prize_money::numeric(18,2), 0)) AS prize_money,
         
         TRIM(liquipedia_link::varchar) AS liquipedia_link
 

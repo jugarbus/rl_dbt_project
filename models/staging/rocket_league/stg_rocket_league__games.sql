@@ -10,12 +10,12 @@ WITH src_main AS (
 filtered AS (
     -- 1. Filtrar game_id no nulos y normalizar
     SELECT
-       TRIM(game_id::varchar) AS game_id,
-        TRIM(match_id::varchar)::varchar AS match_id,
+       LOWER(TRIM(game_id::varchar)) AS game_id,
+        LOWER(TRIM(match_id::varchar)) AS match_id,
         game_number::int as game_number,
         CONVERT_TIMEZONE('UTC', game_date) AS game_date_utc, 
         game_duration::int AS game_duration_secs,
-        TRIM(map_name::varchar) AS map_name, 
+       LOWER(TRIM(map_name::varchar)) AS map_name, 
         overtime    
         FROM src_main
     WHERE game_id IS NOT NULL
