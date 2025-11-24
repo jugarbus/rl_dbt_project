@@ -85,17 +85,35 @@ models:
         data_type: varchar
         description: "Natural Key. Original Octane.gg event ID."
 
-      - name: event_name
+      - name: event_name_id
         data_type: varchar
         description: "Name of the event."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__event_names')
+                field: event_name_id     
 
-      - name: event_split
+      - name: event_split_id
         data_type: varchar
         description: "Event split / part of the season."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__event_splits')
+                field: event_split_id     
 
-      - name: event_region
+      - name: event_region_id
         data_type: varchar
         description: "Region where the event takes place."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__regions')
+                field: region_id     
 
       - name: event_start_date_utc
         data_type: timestamp_tz
@@ -105,11 +123,17 @@ models:
         data_type: timestamp_tz
         description: "End date and time of the event in UTC."
 
-      - name: event_tier
+      - name: event_tier_id
         data_type: varchar
         description: "Event tier / level."
+        tests:
+          - not_null
+          - relationships: 
+              arguments:              
+                to: ref('stg_rocket_league__event_tiers')
+                field: event_tier_id     
 
-      - name: event_phase
+      - name: event_phase_id
         data_type: varchar
         description: "Specific phase of the event (e.g., Main Event, Closed Qualifier)."
 
@@ -128,21 +152,25 @@ models:
         data_type: varchar
         description: "Primary Key. Surrogate Key (hash) of the game."
 
-      - name: game_nk
-        data_type: varchar
-        description: "Natural Key. Original Octane.gg game ID."
-
-      - name: match_nk
-        data_type: varchar
-        description: "Natural Key of the parent match."
-
       - name: match_id
         data_type: varchar
         description: "Foreign Key to the Match dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__matches')
+                field: match_id         
 
       - name: map_id
         data_type: varchar
         description: "Foreign Key to the Map dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__map')
+                field: map_id     
 
       - name: game_number
         data_type: number
@@ -207,6 +235,12 @@ models:
       - name: stage_id
         data_type: varchar
         description: "Foreign Key to the Stage dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__stages')
+                field: stage_id     
 
       - name: match_url
         data_type: varchar
@@ -219,6 +253,12 @@ models:
       - name: match_round_id
         data_type: varchar
         description: "Foreign Key to the Match Round dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__match_rounds')
+                field: match_round_id     
 
       - name: match_date_utc
         data_type: timestamp_tz
@@ -227,6 +267,12 @@ models:
       - name: match_format_id
         data_type: varchar
         description: "Foreign Key to the Match Format dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__match_formats')
+                field: match_format_id     
 
       - name: reverse_sweep_attempt
         data_type: boolean
@@ -257,8 +303,14 @@ models:
       - name: player_country_id
         data_type: varchar
         description: "Primary Key. Surrogate key (hash) for the country."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__player_continents')
+                field: player_country_id 
 
-      - name: raw_code
+      - name: player_country_nk
         data_type: varchar
         description: "Original country code from the raw source."
 
@@ -280,22 +332,48 @@ models:
       - name: game_id
         data_type: varchar
         description: "Foreign Key to the Game dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__games')
+                field: game_id
 
       - name: player_id
         data_type: varchar
         description: "Foreign Key to the Player dimension."
+        tests:
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__players')
+                field: player_id
 
       - name: team_id
         data_type: varchar
         description: "Foreign Key to the Team dimension."
+        tests:
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__teams')
+                field: team_id
 
       - name: platform_id
         data_type: varchar
         description: "Foreign Key to the Platform dimension."
+        tests:
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__platforms')
+                field: platform_id
 
       - name: car_id
         data_type: varchar
         description: "Foreign Key to the Car dimension."
+        tests:
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__cars')
+                field: car_id    
 
       - name: boost_bpm
         data_type: number
@@ -415,6 +493,11 @@ models:
       - name: player_country_id
         data_type: varchar
         description: "Foreign Key to the Player Country dimension."
+        tests:
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__player_countries')
+                field: player_country_id  
 
   - name: stg_rocket_league__regions
     description: "Lookup table for competitive Regions."
@@ -448,10 +531,22 @@ models:
       - name: stage_name_id
         data_type: varchar
         description: "Foreign Key to the Stage Name lookup."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__stage_names')
+                field: stage_name_id     
 
       - name: event_id
         data_type: varchar
         description: "Foreign Key to the Event dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__events')
+                field: event_id     
 
       - name: stage_step_clean
         data_type: varchar
@@ -480,6 +575,7 @@ models:
         data_type: varchar
         description: "Primary Key. Surrogate Key (hash) of the team."
 
+
       - name: team_url
         data_type: varchar
         description: "Octane.gg URL profile for the team."
@@ -491,6 +587,12 @@ models:
       - name: team_region_id
         data_type: varchar
         description: "Foreign Key to the Region dimension (home region of the team)."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__regions')
+                field: region_id 
 
   - name: base_rocket_league__event_regions
     description: "Base ephemeral model extracting unique regions from event data."

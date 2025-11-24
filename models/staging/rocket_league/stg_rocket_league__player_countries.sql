@@ -20,7 +20,7 @@ normalized AS (
 surrogate AS (
     SELECT
         {{ dbt_utils.generate_surrogate_key(['raw_code_clean']) }} AS player_country_id,
-        raw_code_clean AS raw_code,
+        raw_code_clean AS player_country_nk,
         country_name_clean AS country_name,
         {{ dbt_utils.generate_surrogate_key(['continent_clean']) }} AS continent_id, 
  

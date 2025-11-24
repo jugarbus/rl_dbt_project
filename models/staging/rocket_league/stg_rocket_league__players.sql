@@ -18,6 +18,7 @@ normalized AS (
         LOWER(COALESCE(TRIM(player_country::varchar), '{{ var("unknown_var") }}')) AS player_country_clean
 
     FROM src_players
+    WHERE player_id IS NOT NULL 
 ),
 
 surrogate AS (

@@ -486,14 +486,6 @@ sources:
             data_type: string
             description: "Normalized country or subdivision name."
 
-          - name: iso2
-            data_type: string
-            description: "ISO-3166-1 alpha-2 code."
-
-          - name: iso3166_2
-            data_type: string
-            description: "ISO-3166-2 subdivision code when applicable."
-
           - name: continent
             data_type: string
             description: "Continent associated with the country."
