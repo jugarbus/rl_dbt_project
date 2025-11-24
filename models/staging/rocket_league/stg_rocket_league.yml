@@ -109,7 +109,7 @@ models:
           - not_null
           - relationships:
               arguments:              
-                to:  ('stg_rocket_league__event_splits')
+                to:  ref('stg_rocket_league__event_splits')
                 field: event_split_id     
 
       - name: event_region_id

@@ -15,17 +15,22 @@ match_formats AS (
 )
 
 SELECT
-match_id,
-match_round_id,
-match_format_id
-
+m.match_id,
+m.match_number,
+mr.match_round_name AS match_round,
+mf.match_format_name AS match_format,
+m.reverse_sweep_attempt AS is_reverse_sweep_attempt,
+m.reverse_sweep AS is_reverse_sweep,
+m.match_date_utc,
+m.match_url
 
 FROM matches m
--- Jugador con País
+
 LEFT JOIN match_rounds mr
-    ON  = 
+    ON m.match_round_id = mr.match_round_id 
 
--- Unimos el resultado anterior con Continente
-
-LEFT JOIN match_format mf 
-    ON  = 
+LEFT JOIN match_formats mf 
+    ON  m.match_format_id = mf.match_format_id 
+ORDER BY 
+    m.match_date_utc ASC,  
+    m.match_number ASC     
