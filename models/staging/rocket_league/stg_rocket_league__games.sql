@@ -87,7 +87,7 @@ surrogate AS (
         game_number,
         game_date_utc, 
         game_duration_secs,
-        overtime
+        overtime AS is_overtime
     FROM uniques
 )
 

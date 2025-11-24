@@ -60,7 +60,7 @@ final AS (
         {{ dbt_utils.generate_surrogate_key(['event_tier_clean']) }}  AS event_tier_id, 
         {{ dbt_utils.generate_surrogate_key(['event_phase_clean']) }}  AS event_phase_id, 
         prize_money,
-        liquipedia_link
+        liquipedia_link AS event_url
     FROM deduplicated
 )
 

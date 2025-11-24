@@ -109,7 +109,7 @@ models:
           - not_null
           - relationships:
               arguments:              
-                to: ref('stg_rocket_league__event_splits')
+                to:  ('stg_rocket_league__event_splits')
                 field: event_split_id     
 
       - name: event_region_id
@@ -148,7 +148,7 @@ models:
         data_type: varchar
         description: "Total prize pool for this specific event phase."
 
-      - name: liquipedia_link
+      - name: event_url
         data_type: varchar
         description: "Liquipedia Rocket League link for reference."
 
