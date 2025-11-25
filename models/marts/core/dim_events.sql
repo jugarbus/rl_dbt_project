@@ -17,6 +17,7 @@ SELECT
     prize_dollars,
     event_start_date_utc,
     event_end_date_utc,
-    event_url
+    event_url,
+    data_load
 
 FROM joined_events

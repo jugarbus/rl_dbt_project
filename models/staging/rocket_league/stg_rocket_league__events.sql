@@ -25,7 +25,8 @@ cleaned_data AS (
         -- Aseguramos que el dinero sea numérico y convertimos nulos a 0 para poder ordenar
         LOWER(COALESCE(prize_money::numeric(18,2), 0)) AS prize_money,
         
-        TRIM(liquipedia_link::varchar) AS liquipedia_link
+        TRIM(liquipedia_link::varchar) AS liquipedia_link,
+        CONVERT_TIMEZONE('UTC', data_load) AS data_load
 
     FROM src_main
     WHERE event_id IS NOT NULL
@@ -60,7 +61,8 @@ final AS (
         {{ dbt_utils.generate_surrogate_key(['event_tier_clean']) }}  AS event_tier_id, 
         {{ dbt_utils.generate_surrogate_key(['event_phase_clean']) }}  AS event_phase_id, 
         prize_money,
-        liquipedia_link AS event_url
+        liquipedia_link AS event_url,
+        data_load
     FROM deduplicated
 )
 

@@ -41,12 +41,12 @@ models:
     staging:
       +database: "{{ env_var('DBT_ENVIRONMENTS') }}_SILVER"
       rocket_league:
-        +schema: ROCKET_LEAGUE_STAGING
+        +schema: ROCKET_LEAGUE
 
-    # marts:
-    #   +database: "{{ env_var('DBT_ENVIRONMENTS') }}_GOLD"
-    #   core:
-    #     +schema: ROCKET_LEAGUE
+    marts:
+      +database: "{{ env_var('DBT_ENVIRONMENTS') }}_GOLD"
+      core:
+        +schema: CORE
 
 
 

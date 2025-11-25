@@ -42,7 +42,9 @@ SELECT
     e.prize_money AS prize_dollars,
     e.event_start_date_utc,
     e.event_end_date_utc,
-    e.event_url 
+    e.event_url ,
+
+    e.data_load
 
 FROM events e
 LEFT JOIN event_names en  ON e.event_name_id = en.event_name_id

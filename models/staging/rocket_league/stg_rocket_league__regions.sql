@@ -12,12 +12,14 @@ regions_from_teams AS (
 
 unioned_regions AS (
     -- Se unifica el nombre de la columna a 'region_name'
-    SELECT event_region_name AS region_name 
+    SELECT event_region_name AS region_name,
+            data_load
     FROM regions_from_events
     
     UNION
     
-    SELECT team_region_name AS region_name 
+    SELECT team_region_name AS region_name,
+            data_load 
     FROM regions_from_teams
 ),
 
@@ -26,7 +28,8 @@ final AS (
         -- Generamos la SK sobre la lista TOTAL unificada
         {{ dbt_utils.generate_surrogate_key(['region_name']) }} AS region_id,
         
-        region_name
+        region_name,
+        data_load
 
     FROM unioned_regions
 )

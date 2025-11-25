@@ -21,7 +21,9 @@ filtered AS (
         game_number::int AS game_number,
         game_duration::int AS game_duration_secs,
         LOWER(COALESCE(TRIM(map_name::varchar), '{{ var("unknown_var") }}')) AS map_name, 
-        overtime::boolean AS overtime
+        overtime::boolean AS overtime,
+        CONVERT_TIMEZONE('UTC', data_load) AS data_load
+
 
     FROM src_main
     WHERE game_id IS NOT NULL
@@ -56,7 +58,8 @@ imput_null_game_dates AS (
         
         game_duration_secs,
         map_name,
-        overtime
+        overtime,
+        data_load
     FROM time_offset_calculation
 ),
 
@@ -69,7 +72,8 @@ uniques AS (
         final_game_date_utc AS game_date_utc, 
         game_duration_secs,
         map_name,         
-        overtime
+        overtime,
+        data_load
     FROM imput_null_game_dates
 ),
 
@@ -87,7 +91,8 @@ surrogate AS (
         game_number,
         game_date_utc, 
         game_duration_secs,
-        overtime AS is_overtime
+        overtime AS is_overtime,
+        data_load
     FROM uniques
 )
 

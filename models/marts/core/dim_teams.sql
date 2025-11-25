@@ -1,5 +1,5 @@
 {{ config(
-    materialized='view'
+    materialized='table'
 ) }}
 
 WITH teams AS (
@@ -14,7 +14,9 @@ SELECT
     t.team_id,
     t.team_name,
     t.team_url,
-    r.region_name
+    r.region_name,
+
+    t.data_load
 
 FROM teams t
 -- Equipo con Región

@@ -1,5 +1,5 @@
 {{ config(
-    materialized='view'
+    materialized='table'
 ) }}
 
 WITH source_games AS (
@@ -18,7 +18,8 @@ SELECT
     game_number,
     is_overtime,
     game_duration_secs,
-    game_date_utc
+    game_date_utc,
+    data_load
 
 FROM calculation_for_ordering
 

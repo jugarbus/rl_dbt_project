@@ -1,5 +1,5 @@
 {{ config(
-    materialized='view'
+    materialized='table'
 ) }}
 
 WITH matches AS (
@@ -22,7 +22,8 @@ mf.match_format_name AS match_format,
 m.reverse_sweep_attempt AS is_reverse_sweep_attempt,
 m.reverse_sweep AS is_reverse_sweep,
 m.match_date_utc,
-m.match_url
+m.match_url,
+m.data_load
 
 FROM matches m
 

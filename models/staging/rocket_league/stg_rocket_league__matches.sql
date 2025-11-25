@@ -44,7 +44,9 @@ normalization AS (
         
         LOWER(COALESCE(TRIM(stage), '{{ var("unknown_var", "unknown") }}')) AS stage_name_clean,
         TRY_CAST(stage_step AS INT) AS stage_step_clean,
-        CONVERT_TIMEZONE('UTC', stage_start_date) AS stage_start_date_utc
+        CONVERT_TIMEZONE('UTC', stage_start_date) AS stage_start_date_utc,
+        CONVERT_TIMEZONE('UTC', data_load) AS data_load
+
 
     FROM src_main
     WHERE match_id IS NOT NULL
@@ -83,7 +85,8 @@ surrogate AS (
         match_number,
         match_date_utc,
         reverse_sweep_attempt_clean AS reverse_sweep_attempt,
-        reverse_sweep_clean AS reverse_sweep
+        reverse_sweep_clean AS reverse_sweep,
+        data_load
 
     FROM uniques
 )

@@ -14,7 +14,10 @@ distinct_values AS (
                 '{{ var("unknown_country_code", "Unknown") }}'
             )
         )
-     ) AS clean_value
+     ) AS clean_value,
+
+        CONVERT_TIMEZONE('UTC', data_load) AS data_load
+
     FROM src_data
 ),
 
@@ -22,9 +25,9 @@ final AS (
     SELECT
         -- Generamos la Surrogate Key sobre el valor limpio (ahora incluyendo 'Unknown')
         {{ dbt_utils.generate_surrogate_key(['clean_value']) }} AS {{ id_alias }},
-        
         -- El nombre limpio
-        clean_value AS {{ name_alias }}
+        clean_value AS {{ name_alias }},
+        data_load
     FROM distinct_values
 )
 

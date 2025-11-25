@@ -1,5 +1,5 @@
 {{ config(
-    materialized='view'
+    materialized='table'
 ) }}
 
 WITH stages AS (
@@ -17,7 +17,9 @@ SELECT
     s.stage_is_lan,
     s.stage_is_qualifier,
     s.stage_start_date_utc,
-    s.stage_end_date_utc
+    s.stage_end_date_utc,
+
+    s.data_load
 
 FROM stages s
 

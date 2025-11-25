@@ -40,6 +40,10 @@ sources:
             data_type: string
             description: "Player country."
 
+          - name: data_load
+            data_type: timestamp_tz
+            description: "Date when the data was load"
+
 
 
       - name: raw_main
@@ -198,6 +202,10 @@ sources:
           - name: ballchasing_id
             data_type: string
             description: "ballchasing.com ID (link to replay uploaded)."
+
+          - name: data_load
+            data_type: timestamp_tz
+            description: "Date when the data was load"
 
 
       - name: raw_games_players
@@ -472,6 +480,10 @@ sources:
           - name: winner
             data_type: boolean
             description: "Did the team win the game?"
+          
+          - name: data_load
+            data_type: timestamp_tz
+            description: "Date when the data was load"
 
       - name: raw_player_countries
         description: "Standardized country lookup table derived from raw player data."
@@ -489,4 +501,8 @@ sources:
           - name: continent
             data_type: string
             description: "Continent associated with the country."
+         
+          - name: data_load
+            data_type: timestamp_tz
+            description: "Date when the data was load"
 

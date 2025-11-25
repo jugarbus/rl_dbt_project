@@ -1,5 +1,5 @@
 {{ config(
-    materialized='view'
+    materialized='table'
 ) }}
 
 WITH players AS (
@@ -26,7 +26,8 @@ SELECT
     c.country_name,
 
     -- 3. Traemos datos del Continente (Nivel 2)
-    cont.continent_name
+    cont.continent_name,
+    p.data_load
 
 FROM players p
 -- Jugador con País

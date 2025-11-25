@@ -20,7 +20,9 @@ unique_stages AS (
 
         -- Limpieza de Evento 
         LOWER(TRIM(event_id::varchar)) AS event_natural_key_clean,
-        LOWER(TRIM(COALESCE(event_phase::varchar, '{{ var("unknown_var", "unknown") }}'))) AS event_phase_clean
+        LOWER(TRIM(COALESCE(event_phase::varchar, '{{ var("unknown_var", "unknown") }}'))) AS event_phase_clean,
+        CONVERT_TIMEZONE('UTC', data_load) AS data_load
+
 
     FROM src_main
     WHERE event_id IS NOT NULL 
@@ -52,7 +54,8 @@ final AS (
         stage_start_date_utc,
         stage_end_date_utc,
         stage_is_lan,
-        stage_is_qualifier
+        stage_is_qualifier,
+        data_load
 
     FROM unique_stages
 )

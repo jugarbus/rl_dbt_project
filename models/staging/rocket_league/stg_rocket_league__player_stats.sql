@@ -1,11 +1,17 @@
 {{
   config(
-    materialized='view'
+    materialized='incremental',
+    unique_key='game_player_id',
+    on_schema_change='append_new_columns'
   )
 }}
 
 WITH base_games_players AS (
     SELECT * FROM {{ ref('base_rocket_league__games_players') }} 
+           
+    {% if is_incremental() %}
+      where data_load > (select max(data_load) from {{ this }})
+    {% endif %}
 ),
 
 
