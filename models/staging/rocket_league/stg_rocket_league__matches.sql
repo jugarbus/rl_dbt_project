@@ -58,7 +58,7 @@ uniques AS (
     FROM normalization
     QUALIFY ROW_NUMBER() OVER (
         PARTITION BY match_id_clean  
-        ORDER BY match_date_utc DESC
+        ORDER BY data_load DESC, match_date_utc DESC
     ) = 1
 ),
 

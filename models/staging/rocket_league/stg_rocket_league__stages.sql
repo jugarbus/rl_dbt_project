@@ -7,10 +7,10 @@ WITH src_main AS (
     FROM {{ source('rocket_league', 'raw_main') }}
 ),
 
-unique_stages AS (
-    -- 1. Seleccionamos columnas de Stage y Evento necesarias
-    SELECT DISTINCT
-        -- Limpieza de Stage
+cleaned_stages AS (
+    -- Limpieza 
+    SELECT
+        -- Datos del Stage
         LOWER(COALESCE(TRIM(stage::varchar), '{{ var("unknown_var", "unknown") }}')) AS stage_name_clean,
         stage_step::int AS stage_step_clean,
         CONVERT_TIMEZONE('UTC', stage_start_date) AS stage_start_date_utc,
@@ -18,20 +18,46 @@ unique_stages AS (
         stage_is_lan::boolean AS stage_is_lan,
         stage_is_qualifier::boolean AS stage_is_qualifier,
 
-        -- Limpieza de Evento 
+        -- Datos del Evento (Padre)
         LOWER(TRIM(event_id::varchar)) AS event_natural_key_clean,
         LOWER(TRIM(COALESCE(event_phase::varchar, '{{ var("unknown_var", "unknown") }}'))) AS event_phase_clean,
+        
+        -- Metadata
         CONVERT_TIMEZONE('UTC', data_load) AS data_load
 
-
     FROM src_main
-    WHERE event_id IS NOT NULL 
+    WHERE event_id IS NOT NULL
+),
+
+unique_stages AS (
+    -- Agrupamos para eliminar duplicados y coger la fecha más reciente
+    SELECT
+        stage_name_clean,
+        stage_step_clean,
+        stage_start_date_utc,
+        stage_end_date_utc,
+        stage_is_lan,
+        stage_is_qualifier,
+        event_natural_key_clean,
+        event_phase_clean,
+        
+        MAX(data_load) as data_load
+        
+    FROM cleaned_stages
+    GROUP BY 
+        stage_name_clean,
+        stage_step_clean,
+        stage_start_date_utc,
+        stage_end_date_utc,
+        stage_is_lan,
+        stage_is_qualifier,
+        event_natural_key_clean,
+        event_phase_clean
 ),
 
 final AS (
     SELECT
-        -- 2. Generamos la SK del Stage 
-        -- INCLUYE EL EVENTO PARA EVITAR DUPLICADOS
+        -- 3. Generación de IDs
         {{ dbt_utils.generate_surrogate_key([
             'event_natural_key_clean',  
             'event_phase_clean',        
@@ -40,16 +66,14 @@ final AS (
             'stage_step_clean'
         ]) }} AS stage_id,
         
-        -- FK a Stage Name (Lookup table)
         {{ dbt_utils.generate_surrogate_key(["stage_name_clean"]) }} AS stage_name_id,
 
-        -- 3. Generamos la FK hacia Events
         {{ dbt_utils.generate_surrogate_key([
             'event_natural_key_clean', 
             'event_phase_clean'
         ]) }} AS event_id,
 
-        -- Campos informativos
+        -- Campos
         stage_step_clean AS stage_step,
         stage_start_date_utc,
         stage_end_date_utc,

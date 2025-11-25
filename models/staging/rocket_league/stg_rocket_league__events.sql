@@ -37,10 +37,9 @@ deduplicated AS (
     SELECT *
     FROM cleaned_data
     -- Agrupamos por los campos que definen la CLAVE (ID  + Fase).
-    -- Ordenamos por prize_money DESC (el mayor arriba).
-    -- Nos quedamos solo con el primero (= 1).
+
     QUALIFY ROW_NUMBER() OVER (
-        PARTITION BY event_natural_key, event_tier_clean, event_phase_clean 
+        PARTITION BY event_natural_key, event_phase_clean 
         ORDER BY prize_money DESC, event_start_date_utc DESC
     ) = 1
 ),

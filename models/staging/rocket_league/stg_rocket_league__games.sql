@@ -63,18 +63,24 @@ imput_null_game_dates AS (
     FROM time_offset_calculation
 ),
 
--- 4. Deduplicación
+-- 4. Deduplicación Inteligente 
 uniques AS (
-    SELECT DISTINCT
+    SELECT 
         game_id,         
         match_id,        
         game_number,
-        final_game_date_utc AS game_date_utc, 
+        final_game_date_utc AS game_date_utc,
         game_duration_secs,
         map_name,         
         overtime,
         data_load
     FROM imput_null_game_dates
+    
+    -- Lógica: Agrupa por game_id y quédate con el que tenga el data_load más reciente
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY game_id 
+        ORDER BY data_load DESC
+    ) = 1
 ),
 
 -- 5. Generación de Claves (Hashes)

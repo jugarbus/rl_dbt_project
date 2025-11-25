@@ -8,15 +8,18 @@ WITH src_main AS (
 ),
 
 cleaned_formats AS (
-    -- PASO 1: Limpiar los tipos y normalizar textos
+    -- Limpiar los tipos y normalizar textos
     SELECT 
-    LOWER(COALESCE(TRIM(
-        CASE 
-            WHEN match_format = 'best-of-67' THEN '{{ var("match_format") }}'
-            WHEN match_format = 'best-of-78' THEN '{{ var("match_format") }}'
-            ELSE match_format
-        END::varchar
-     ), '{{ var("unknown_var") }}')) AS match_format_clean,
+        LOWER(TRIM(
+            COALESCE(
+                CASE 
+                    WHEN match_format = 'best-of-67' THEN '{{ var("match_format") }}'
+                    WHEN match_format = 'best-of-78' THEN '{{ var("match_format") }}'
+                    ELSE match_format
+                END::varchar, 
+                '{{ var("unknown_var") }}'
+            )
+        )) AS match_format_clean,
 
         CONVERT_TIMEZONE('UTC', data_load) AS data_load
 
@@ -25,12 +28,15 @@ cleaned_formats AS (
 ),
 
 unique_formats AS (
-    -- PASO 2: Deduplicar y generar ID sobre el dato YA limpio
-    SELECT DISTINCT
-        {{ dbt_utils.generate_surrogate_key(["match_format_clean"]) }} AS match_format_id,   
-        LOWER(TRIM(match_format_clean)) AS match_format_name,
-        data_load
+    -- Deduplicar usando GROUP BY para evitar duplicados por fecha
+    SELECT 
+        -- Generamos el ID
+        {{ dbt_utils.generate_surrogate_key(["match_format_clean"]) }} AS match_format_id,
+        match_format_clean AS match_format_name,
+        MAX(data_load) AS data_load
+        
     FROM cleaned_formats
+    GROUP BY match_format_clean -- Agrupamos solo por el nombre
 )
 
 SELECT *
