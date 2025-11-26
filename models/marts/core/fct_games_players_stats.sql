@@ -6,7 +6,7 @@
   )
 }}
 
-WITH player_stats AS (
+WITH player_kpis AS (
     SELECT * FROM {{ ref('int_rocket_league__add_kpis') }}
     {% if is_incremental() %}
     WHERE data_load > (SELECT max(data_load) FROM {{ this }})
@@ -81,9 +81,11 @@ SELECT
 
     s.is_mvp,
     s.is_winner,
+    TO_NUMBER(TO_CHAR(h.game_date_utc, 'YYYYMMDD')) AS date_id,    
+    h.game_date_utc,
+
     s.data_load AS data_load
 
-FROM player_stats s
+FROM player_kpis s
 LEFT JOIN game_hierarchy h 
     ON s.game_id = h.game_id
-

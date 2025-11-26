@@ -12,16 +12,13 @@ matches AS (
 
 stages AS (
     SELECT * FROM {{ ref('stg_rocket_league__stages') }}
-),
-
-events AS (
-    -- Solo necesitamos el ID para validar, o si quieres traer atributos aquí
-    SELECT * FROM {{ ref('stg_rocket_league__events') }} 
 )
 
 SELECT
     -- Base (El hijo menor)
     g.game_id,
+    g.game_date_utc,
+
     -- Nivel 1: Match
     m.match_id,
 
@@ -38,4 +35,3 @@ SELECT
 FROM games g
 LEFT JOIN matches m ON g.match_id = m.match_id
 LEFT JOIN stages s  ON m.stage_id = s.stage_id
-LEFT JOIN events e  ON s.event_id = e.event_id
