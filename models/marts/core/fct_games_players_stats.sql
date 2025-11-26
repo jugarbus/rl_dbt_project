@@ -36,6 +36,7 @@ SELECT
     -- Métricas
     s.goals,
     s.shots,
+    s.shooting_percentage,
     s.saves,
     s.assists,
 
@@ -58,6 +59,25 @@ SELECT
     s.positioning_percent_behind_ball,
     s.positioning_percent_most_back,
     s.positioning_percent_most_forward,
+
+-- KPIS
+    -- Agresivo
+    s.offensive_conversion_rate,
+    s.offensive_intensity_score,
+    s.disruption_score,
+    s.boost_hunger_score,
+
+
+    -- Defensivo
+    s.defensive_discipline_score,
+    s.survival_rating,
+    s.resource_management_score,
+
+
+    -- ESTILO DE JUEGO
+    s.speed_ratio,
+    s.aerial_threat_index,
+
 
     s.is_mvp,
     s.is_winner,
