@@ -7,7 +7,7 @@
 }}
 
 WITH player_stats AS (
-    SELECT * FROM {{ ref('stg_rocket_league__player_stats') }}
+    SELECT * FROM {{ ref('int_rocket_league__add_kpis') }}
     {% if is_incremental() %}
     WHERE data_load > (SELECT max(data_load) FROM {{ this }})
 {% endif %}
@@ -64,7 +64,6 @@ SELECT
     s.data_load AS data_load
 
 FROM player_stats s
--- UN SOLO JOIN MAESTRO
 LEFT JOIN game_hierarchy h 
     ON s.game_id = h.game_id
 
