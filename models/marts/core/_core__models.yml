@@ -1,0 +1,250 @@
+version: 2
+
+models:
+  # =========================================================
+  #  FACT TABLE: ESTADÍSTICAS DE JUEGO (PERFORMANCE)
+  # =========================================================
+  - name: fct_games_players_stats
+    description: >
+      Tabla de Hechos principal del modelo. Granularidad: Un registro por jugador por juego (partida individual).
+      Contiene métricas de rendimiento puras y KPIs avanzados calculados para el perfilado de jugadores.
+    columns:
+      # --- IDENTIFICADORES Y CLAVES ---
+      - name: game_player_id
+        description: "Primary Key. Surrogate Key única (Hash de Game ID + Player ID)."
+        tests: [unique, not_null]
+
+      - name: date_id
+        description: "FK a Dimensión Tiempo (YYYYMMDD). Permite filtrar por fecha, mes, año, etc."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_id
+
+      - name: game_id
+        description: "FK a Dimensión Juego. Detalles específicos del mapa y duración."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_games')
+                field: game_id
+
+      - name: match_id
+        description: "FK a Dimensión Partido (Serie). Agrupa los juegos en un enfrentamiento (Best of X)."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_matches')
+                field: match_id
+
+      - name: event_id
+        description: "FK a Dimensión Evento. Contexto del torneo (Regional, Major, Qualifier)."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_events')
+                field: event_id
+
+      - name: player_id
+        description: "FK a Dimensión Jugador. Perfil del jugador profesional."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_players')
+                field: player_id
+
+      - name: team_id
+        description: "FK a Dimensión Equipo. Apunta a la versión histórica específica del equipo en la fecha del partido."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_teams')
+                field: team_sk
+
+      - name: map_id
+        description: "FK a Dimensión Mapa. Estadio donde se jugó."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_maps')
+                field: map_id
+
+      - name: car_id
+        description: "FK a Dimensión Coche. Vehículo utilizado."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_cars')
+                field: car_id
+
+      # --- MÉTRICAS BASE ---
+      - name: goals
+        description: "Goles marcados en el juego."
+      - name: shots
+        description: "Tiros a puerta realizados."
+      - name: saves
+        description: "Paradas realizadas."
+      - name: assists
+        description: "Asistencias de gol."
+      - name: demo_inflicted
+        description: "Número de oponentes demolidos."
+      - name: demo_taken
+        description: "Número de veces que el jugador fue demolido."
+      
+      # --- KPIS AVANZADOS (Perfilado de Jugador) ---
+      
+      # Puntería
+      - name: shooting_percentage
+        description: "Eficiencia de tiro. Calculado como: Goals / Shots."
+      
+      - name: offensive_conversion_rate
+        description: "Contribución ofensiva por tiro. Calculado como: (Goals + Assists) / Shots."
+
+      # Perfil Agresivo
+      - name: offensive_intensity_score
+        description: "Índice de presencia en ataque. Promedio del tiempo en el tercio ofensivo y tiempo siendo el jugador más adelantado."
+      
+      - name: disruption_score
+        description: "Índice de disrupción al rival. Combina el juego físico (Demos) con el robo de recursos (Boost Stolen)."
+      
+      - name: boost_hunger_score
+        description: "Índice de consumo de recursos. Relación entre lo que gasta/roba y lo que recolecta. Un valor alto indica un estilo de juego de alto consumo."
+
+      # Perfil Defensivo
+      - name: defensive_discipline_score
+        description: "Índice de disciplina defensiva. Promedio del tiempo en el tercio defensivo y tiempo siendo el último hombre."
+      
+      - name: survival_rating
+        description: "Eficiencia defensiva bajo presión. Ratio de paradas realizadas por cada vez que es demolido (Saves / (Demo Taken + 1))."
+      
+      - name: resource_management_score
+        description: "Eficiencia en gestión de turbo. Capacidad de mantener un nivel alto de boost con un consumo controlado (Avg Boost / Boost Usage)."
+
+      # Estilo de Juego
+      - name: speed_ratio
+        description: "Perfil de velocidad. Relación entre tiempo a velocidad supersónica y tiempo a velocidad lenta."
+      
+      - name: aerial_threat_index
+        description: "Índice de juego aéreo. Combina el tiempo en aire alto con la velocidad supersónica (indicador de fast aerials)."
+
+      # --- METADATA ---
+      - name: is_winner
+        description: "Flag: 1 si el jugador ganó el partido, 0 si perdió."
+      - name: is_mvp
+        description: "Flag: 1 si el jugador fue el MVP del partido."
+      - name: data_load
+        description: "Fecha UTC de carga del dato original en el sistema."
+
+  # =========================================================
+  #  DIMENSIONES (STAR SCHEMA)
+  # =========================================================
+  
+  - name: dim_events
+    description: "Dimensión de Eventos y Torneos. Consolida información de Eventos, Fases, Splits y Regiones."
+    columns:
+      - name: event_id
+        description: "Primary Key. Surrogate Key única para el evento/fase."
+        tests: [unique, not_null]
+      - name: event_nk
+        description: "ID Natural (Octane.gg) del evento."
+      - name: event_name
+        description: "Nombre descriptivo del evento."
+      - name: event_region
+        description: "Región geográfica del torneo."
+      - name: prize_dollars
+        description: "Bolsa de premios (Prize Pool) total de esta fase del evento."
+
+  - name: dim_matches
+    description: "Dimensión de Partidos (Series). Contexto del enfrentamiento entre equipos."
+    columns:
+      - name: match_id
+        description: "Primary Key. Surrogate Key única de la serie."
+        tests: [unique, not_null]
+      - name: match_format
+        description: "Formato de la serie (ej: Best of 5, Best of 7)."
+      - name: match_round
+        description: "Ronda del torneo (ej: Grand Final, Quarter-Final)."
+      - name: is_reverse_sweep
+        description: "Flag booleano indicando si hubo una remontada completa en la serie."
+
+  - name: dim_games
+    description: "Dimensión de Juegos individuales (Mapas). Detalle temporal de cada partida dentro de una serie."
+    columns:
+      - name: game_id
+        description: "Primary Key. Surrogate Key única del juego."
+        tests: [unique, not_null]
+      - name: game_number
+        description: "Número secuencial del juego dentro de la serie (1, 2, 3...)."
+      - name: map_name
+        description: "Nombre del estadio/mapa jugado."
+      - name: is_overtime
+        description: "Flag booleano indicando si el juego tuvo tiempo extra."
+
+  - name: dim_players
+    description: "Dimensión de Jugadores Profesionales. Incluye nacionalidad y continente."
+    columns:
+      - name: player_id
+        description: "Primary Key. Surrogate Key única del jugador."
+        tests: [unique, not_null]
+      - name: player_tag
+        description: "Nombre de usuario (Gamer Tag) del jugador."
+      - name: country_name
+        description: "País de origen del jugador."
+      - name: continent_name
+        description: "Continente del jugador."
+
+  - name: dim_teams
+    description: "Dimensión de Equipos con Historia (SCD Tipo 2). Permite analizar cambios de nombre y región en el tiempo."
+    columns:
+      - name: team_sk
+        description: "Primary Key. Surrogate Key única para una versión específica del equipo en el tiempo."
+        tests: [unique, not_null]
+      - name: team_id
+        description: "Natural Key. ID de negocio del equipo (se repite si el equipo cambia de nombre)."
+      - name: team_name
+        description: "Nombre del equipo válido en ese periodo."
+      - name: valid_from
+        description: "Fecha de inicio de validez de esta versión."
+      - name: valid_to
+        description: "Fecha de fin de validez (9999-12-31 si es actual)."
+      - name: is_current
+        description: "Flag para filtrar fácilmente la versión actual del equipo."
+
+  - name: dim_maps
+    description: "Dimensión de Mapas (Estadios)."
+    columns:
+      - name: map_id
+        description: "Primary Key."
+        tests: [unique, not_null]
+      - name: map_name
+        description: "Nombre del mapa."
+
+  - name: dim_cars
+    description: "Dimensión de Coches (Car Bodies)."
+    columns:
+      - name: car_id
+        description: "Primary Key."
+        tests: [unique, not_null]
+      - name: car_name
+        description: "Modelo del coche (Octane, Fennec...)."
+
+  - name: dim_date
+    description: "Dimensión de Calendario estándar para análisis temporal y Time Intelligence en BI."
+    columns:
+      - name: date_id
+        description: "Primary Key (Entero YYYYMMDD)."
+        tests: [unique, not_null]
+      - name: year
+      - name: quarter
+      - name: month_name
+      - name: day_of_week
+      - name: is_weekend

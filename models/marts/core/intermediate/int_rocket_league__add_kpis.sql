@@ -12,7 +12,6 @@ SELECT
     team_id,
     platform_id,
     car_id,
-    
     -- Métricas base (Raw)
     goals,
     shots,

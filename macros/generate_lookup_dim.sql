@@ -6,7 +6,6 @@ WITH src_data AS (
 
 grouped_values AS (
     SELECT 
-        -- 1. Limpieza del valor
         LOWER(
             TRIM(
                 COALESCE(

@@ -34,6 +34,7 @@ SELECT
 
     -- FKs (Todas vienen limpias del hierarchy)
     s.game_id,
+    h.map_id,
     h.match_id,
     h.stage_id,
     h.event_id,
@@ -43,7 +44,7 @@ SELECT
     
     s.car_id,
     s.platform_id,
-
+    
     -- Métricas
     s.goals,
     s.shots,
@@ -103,6 +104,8 @@ LEFT JOIN game_hierarchy h
 
 -- "Busca el equipo que tenga el mismo ID natural y que estuviera activo en la fecha del juego"
 LEFT JOIN dim_teams t
-    ON s.team_id = t.team_nk                -- Coincide el ID de negocio (NK)
-    AND h.game_date_utc >= t.valid_from     -- El juego fue después del inicio de la versión
-    AND h.game_date_utc < t.valid_to        -- El juego fue antes del fin de la versión
+    ON s.team_id = t.team_nk                -- Coincide el ID de negocio (NK)    
+    -- AND h.game_date_utc >= t.valid_from     
+    -- AND h.game_date_utc < t.valid_to 
+        AND  t.is_current='TRUE'
+       

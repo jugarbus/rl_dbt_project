@@ -7,7 +7,7 @@ WITH src_main AS (
     FROM {{ source('rocket_league', 'raw_main') }}
 ),
 
--- 1. Filtrado y Normalización
+-- Filtrado y Normalización
 filtered AS (
     SELECT
         LOWER(TRIM(game_id::varchar)) AS game_id,
@@ -29,12 +29,11 @@ filtered AS (
     WHERE game_id IS NOT NULL
 ),
 
--- 2. Cálculo del Offset (Tiempo acumulado)
+-- Cálculo del Offset 
 time_offset_calculation AS (
     SELECT
         *,
         -- Suma acumulada de la duración de los juegos ANTERIORES
-        -- + 300 segundos de descanso entre cada juego.
         SUM(COALESCE(game_duration_secs, 300) + 300) OVER (
             PARTITION BY match_id 
             ORDER BY game_number ASC
@@ -43,14 +42,14 @@ time_offset_calculation AS (
     FROM filtered
 ),
 
--- 3. Imputación de Fechas Nulas
+-- Imputación de Fechas Nulas
 imput_null_game_dates AS (
     SELECT
         game_id,
         match_id,
         game_number,
         
-        -- Si no hay fecha de juego, usa fecha de partido + offset
+        -- Si no hay fecha de juego, usa fecha de match + offset
         COALESCE(
             original_game_date_utc, 
             DATEADD(second, COALESCE(seconds_offset, 0), match_date_utc)
@@ -63,7 +62,7 @@ imput_null_game_dates AS (
     FROM time_offset_calculation
 ),
 
--- 4. Deduplicación Inteligente 
+-- Deduplicación Inteligente 
 uniques AS (
     SELECT 
         game_id,         
@@ -83,7 +82,7 @@ uniques AS (
     ) = 1
 ),
 
--- 5. Generación de Claves (Hashes)
+-- Generación de Claves (Hashes)
 surrogate AS (
     SELECT 
         -- PK

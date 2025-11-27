@@ -1,36 +1,29 @@
 {{ config(
-    materialized='ephemeral' 
+    materialized='view' 
 ) }}
 
 WITH games AS (
     SELECT * FROM {{ ref('stg_rocket_league__games') }}
 ),
 
+
 matches AS (
-    SELECT * FROM {{ ref('stg_rocket_league__matches') }}
+    SELECT match_id, stage_id FROM {{ ref('stg_rocket_league__matches') }}
 ),
 
 stages AS (
-    SELECT * FROM {{ ref('stg_rocket_league__stages') }}
+    SELECT stage_id, event_id FROM {{ ref('stg_rocket_league__stages') }}
 )
 
 SELECT
-    -- Base (El hijo menor)
     g.game_id,
     g.game_date_utc,
-
-    -- Nivel 1: Match
-    m.match_id,
-
-    
-    -- Nivel 2: Stage
-    s.stage_id,
-   
-    -- Nivel 3: Event
-    s.event_id, -- Lo sacamos del stage directamente
-
-
+    g.map_id,   
+    g.match_id,
+    m.stage_id,
+    s.event_id,
     g.data_load
+
 
 FROM games g
 LEFT JOIN matches m ON g.match_id = m.match_id

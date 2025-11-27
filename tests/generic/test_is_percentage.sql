@@ -1,3 +1,5 @@
+
+
 {% test is_percentage(model, column_name) %}
     select *
     from {{ model }}

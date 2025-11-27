@@ -1,3 +1,5 @@
+
+
 {% test is_non_negative(model, column_name) %}
 
     select *
