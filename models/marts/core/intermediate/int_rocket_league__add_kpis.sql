@@ -1,4 +1,4 @@
-{{ config(materialized='ephemeral') }}
+{{ config(materialized='view') }}
 
 WITH player_stats AS (
     SELECT * FROM {{ ref('stg_rocket_league__games_players') }}
