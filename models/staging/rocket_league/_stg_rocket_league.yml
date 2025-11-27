@@ -1,0 +1,868 @@
+version: 2
+
+models:
+  # ---------------------------------------------------------
+  # MODELOS DE LOOKUP / DIMENSIONES AUXILIARES
+  # ---------------------------------------------------------
+  - name: stg_rocket_league__cars
+    description: "Lookup table containing the normalized list of car bodies used in games."
+    columns:
+      - name: car_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the car name."
+        tests: [unique, not_null]
+
+      - name: car_name
+        data_type: varchar
+        description: "Name of the car body (e.g., Octane, Fennec, Dominus)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp when the record was loaded into the staging area."
+
+  - name: stg_rocket_league__continents
+    description: "Lookup table for continents derived from player nationalities."
+    columns:
+      - name: continent_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the continent."
+        tests: [unique, not_null]
+
+      - name: continent_name
+        data_type: varchar
+        description: "Name of the continent (e.g., Europe, North America)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__event_names
+    description: "Lookup table for normalized event names."
+    columns:
+      - name: event_name_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the event name."
+        tests: [unique, not_null]
+
+      - name: event_name
+        data_type: varchar
+        description: "Name of the event (e.g., RLCS 2021-22 - Fall: EU Regional 1)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__event_phases
+    description: "Lookup table for tournament phases (e.g., Main Event, Qualifier)."
+    columns:
+      - name: event_phase_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the event phase."
+        tests: [unique, not_null]
+
+      - name: event_phase_name
+        data_type: varchar
+        description: "Description of the event phase (e.g., Main Event, Closed Qualifier)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__event_splits
+    description: "Lookup table for RLCS seasonal splits."
+    columns:
+      - name: event_split_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the split."
+        tests: [unique, not_null]
+
+      - name: event_split_name
+        data_type: varchar
+        description: "Name of the seasonal split (Fall, Winter, Spring, World Championship)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__event_tiers
+    description: "Lookup table for tournament tiers indicating prestige/importance."
+    columns:
+      - name: event_tier_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the tier."
+        tests: [unique, not_null]
+
+      - name: event_tier_name
+        data_type: varchar
+        description: "Tier name (e.g., S-Tier, A-Tier, Qualifier)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__events
+    description: "Staging model for Tournaments/Events. Each row represents a unique phase of an event."
+    columns:
+      - name: event_id
+        data_type: varchar
+        description: "Primary Key. Surrogate Key generated from Event ID + Phase."
+        tests: [unique, not_null]
+
+      - name: event_nk
+        data_type: varchar
+        description: "Natural Key. Original Octane.gg event ID."
+
+      - name: event_name_id
+        data_type: varchar
+        description: "Name of the event."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__event_names')
+                field: event_name_id     
+
+      - name: event_split_id
+        data_type: varchar
+        description: "Event split / part of the season."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to:  ref('stg_rocket_league__event_splits')
+                field: event_split_id     
+
+      - name: event_region_id
+        data_type: varchar
+        description: "Region where the event takes place."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__regions')
+                field: region_id     
+
+      - name: event_start_date_utc
+        data_type: timestamp_tz
+        description: "Start date and time of the event in UTC."
+
+      - name: event_end_date_utc
+        data_type: timestamp_tz
+        description: "End date and time of the event in UTC."
+
+      - name: event_tier_id
+        data_type: varchar
+        description: "Event tier / level."
+        tests:
+          - not_null
+          - relationships: 
+              arguments:              
+                to: ref('stg_rocket_league__event_tiers')
+                field: event_tier_id     
+
+      - name: event_phase_id
+        data_type: varchar
+        description: "Specific phase of the event (e.g., Main Event, Closed Qualifier)."
+
+      - name: prize_money
+        data_type: varchar
+        description: "Total prize pool for this specific event phase."
+
+      - name: event_url
+        data_type: varchar
+        description: "Liquipedia Rocket League link for reference."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__games
+    description: "Staging model for individual Games (Maps) played within a Match."
+    columns:
+      - name: game_id
+        data_type: varchar
+        description: "Primary Key. Surrogate Key (hash) of the game."
+        tests: [unique, not_null]
+
+      - name: match_id
+        data_type: varchar
+        description: "Foreign Key to the Match dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__matches')
+                field: match_id         
+
+      - name: map_id
+        data_type: varchar
+        description: "Foreign Key to the Map dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__map')
+                field: map_id     
+
+      - name: game_number
+        data_type: number
+        description: "Sequential number of the game within the match (1, 2, 3...)."
+
+      - name: game_date_utc
+        data_type: timestamp_tz
+        description: "Start time of the specific game in UTC (Imputed if null)."
+
+      - name: game_duration_secs
+        data_type: number
+        description: "Duration of the game in seconds."
+
+      - name: map_name
+        data_type: varchar
+        description: "Name of the map/stadium where the game was played."
+
+      - name: overtime
+        data_type: boolean
+        description: "Boolean flag indicating if the game went into overtime."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__maps
+    description: "Lookup table for Maps (Stadiums/Arenas)."
+    columns:
+      - name: map_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the map."
+        tests: [unique, not_null]
+
+      - name: map_name
+        data_type: varchar
+        description: "Name of the map (e.g., DFH Stadium, Mannfield)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__match_formats
+    description: "Lookup table for match formats (e.g., Best of 5)."
+    columns:
+      - name: match_format_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the format."
+        tests: [unique, not_null]
+
+      - name: match_format_name
+        data_type: varchar
+        description: "Description of the format (e.g., Best of 5, Best of 7)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__match_rounds
+    description: "Lookup table for tournament rounds."
+    columns:
+      - name: match_round_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the round."
+        tests: [unique, not_null]
+
+      - name: match_round_name
+        data_type: varchar
+        description: "Name of the round (e.g., Quarter-Finals, Grand Finals, Swiss Round 1)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__matches
+    description: "Staging model for Matches (Series of games between two teams)."
+    columns:
+      - name: match_id
+        data_type: varchar
+        description: "Primary Key. Surrogate Key (hash) of the match."
+        tests: [unique, not_null]
+
+      - name: stage_id
+        data_type: varchar
+        description: "Foreign Key to the Stage dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__stages')
+                field: stage_id     
+
+      - name: match_url
+        data_type: varchar
+        description: "Octane.gg URL for the match details."
+
+      - name: match_number
+        data_type: number
+        description: "Sequential identifier for the match within the stage."
+
+      - name: match_round_id
+        data_type: varchar
+        description: "Foreign Key to the Match Round dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__match_rounds')
+                field: match_round_id     
+
+      - name: match_date_utc
+        data_type: timestamp_tz
+        description: "Start date and time of the match/series in UTC."
+
+      - name: match_format_id
+        data_type: varchar
+        description: "Foreign Key to the Match Format dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__match_formats')
+                field: match_format_id     
+
+      - name: reverse_sweep_attempt
+        data_type: boolean
+        description: "Flag indicating if a reverse sweep was attempted (reached final game after being down)."
+
+      - name: reverse_sweep
+        data_type: boolean
+        description: "Flag indicating if a reverse sweep was successfully completed."
+
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__platforms
+    description: "Lookup table for gaming platforms."
+    columns:
+      - name: platform_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the platform."
+        tests: [unique, not_null]
+
+      - name: platform
+        data_type: varchar
+        description: "Name of the platform (e.g., Steam, Epic, PS4, Xbox)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__player_countries
+    description: "Lookup table linking players to countries and continents."
+    columns:
+      - name: player_country_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the country."
+        tests: [unique, not_null]
+
+
+      - name: player_country_nk
+        data_type: varchar
+        description: "Original country code from the raw source."
+
+      - name: country_name
+        data_type: varchar
+        description: "Normalized country name."
+
+      - name: continent_id
+        data_type: varchar
+        description: "Foreign Key to the Continent dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__continents')
+                field: continent_id   
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__player_stats
+    description: "Incremental Fact Table containing detailed performance stats per player per game."
+    columns:
+      - name: game_player_id
+        data_type: varchar
+        description: "Primary Key. Surrogate Key (Hash of Game ID + Player ID)."
+        tests: [unique, not_null]
+
+      - name: game_id
+        data_type: varchar
+        description: "Foreign Key to the Game dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__games')
+                field: game_id
+
+      - name: player_id
+        data_type: varchar
+        description: "Foreign Key to the Player dimension."
+        tests:
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__players')
+                field: player_id
+
+      - name: team_id
+        data_type: varchar
+        description: "Foreign Key to the Team dimension."
+        tests:
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__teams')
+                field: team_id
+
+      - name: platform_id
+        data_type: varchar
+        description: "Foreign Key to the Platform dimension."
+        tests:
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__platforms')
+                field: platform_id
+
+      - name: car_id
+        data_type: varchar
+        description: "Foreign Key to the Car dimension."
+        tests:
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__cars')
+                field: car_id    
+
+      - name: boost_bpm
+        data_type: number
+        description: "Boost usage per minute."
+
+      - name: boost_bcpm
+        data_type: number
+        description: "Boost collected per minute."
+
+      - name: boost_avg_amnt
+        data_type: number
+        description: "Average boost amount held by the player (0-100)."
+
+      - name: boost_amnt_collected
+        data_type: number
+        description: "Total amount of boost collected."
+
+      - name: boost_amnt_stolen
+        data_type: number
+        description: "Total amount of boost stolen from opponent's side."
+
+      - name: movement_avg_speed
+        data_type: number
+        description: "Average speed of the car."
+
+      - name: movement_percent_slow_speed
+        data_type: number
+        description: "Percentage of time spent driving at slow speed."
+
+      - name: movement_percent_supersonic_speed
+        data_type: number
+        description: "Percentage of time spent driving at supersonic speed."
+
+      - name: movement_percent_ground
+        data_type: number
+        description: "Percentage of time spent on the ground."
+
+      - name: movement_percent_high_air
+        data_type: number
+        description: "Percentage of time spent high in the air (above crossbar height)."
+
+      - name: positioning_percent_defensive_third
+        data_type: number
+        description: "Percentage of time spent in the defensive third of the field."
+
+      - name: positioning_percent_offensive_third
+        data_type: number
+        description: "Percentage of time spent in the offensive third of the field."
+
+      - name: positioning_percent_behind_ball
+        data_type: number
+        description: "Percentage of time the player was positioned behind the ball (relative to own goal)."
+
+      - name: positioning_percent_most_back
+        data_type: number
+        description: "Percentage of time the player was the furthest back on their team."
+
+      - name: positioning_percent_most_forward
+        data_type: number
+        description: "Percentage of time the player was the furthest forward on their team."
+
+      - name: shots
+        data_type: number
+        description: "Number of shots on goal."
+
+      - name: goals
+        data_type: number
+        description: "Number of goals scored."
+
+      - name: saves
+        data_type: number
+        description: "Number of saves made."
+
+      - name: assists
+        data_type: number
+        description: "Number of assists made."
+
+      - name: demo_inflicted
+        data_type: number
+        description: "Number of opponents demolished."
+
+      - name: demo_taken
+        data_type: number
+        description: "Number of times the player was demolished."
+
+      - name: is_mvp
+        data_type: boolean
+        description: "Flag indicating if the player was awarded MVP."
+
+      - name: is_winner
+        data_type: boolean
+        description: "Flag indicating if the player's team won the game."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp when this record was loaded/updated."
+
+  - name: stg_rocket_league__players
+    description: "Staging model for professional Players."
+    columns:
+      - name: player_id
+        data_type: varchar
+        description: "Primary Key. Surrogate Key (hash) of the player."
+        tests: [unique, not_null]
+
+      - name: player_tag
+        data_type: varchar
+        description: "In-game Gamer Tag of the player."
+
+      - name: player_url
+        data_type: varchar
+        description: "Octane.gg URL profile for the player."
+
+      - name: player_name
+        data_type: varchar
+        description: "Real name of the player."
+
+      - name: player_country_id
+        data_type: varchar
+        description: "Foreign Key to the Player Country dimension."
+        tests:
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__player_countries')
+                field: player_country_id  
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__regions
+    description: "Lookup table for competitive Regions."
+    columns:
+      - name: region_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the region."
+        tests: [unique, not_null]
+
+      - name: region_name
+        data_type: varchar
+        description: "Name of the region (e.g., Europe, North America, Oceania)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__stage_names
+    description: "Lookup table for Stage names."
+    columns:
+      - name: stage_name_id
+        data_type: varchar
+        description: "Primary Key. Surrogate key (hash) for the stage name."
+        tests: [unique, not_null]
+
+      - name: stage_name
+        data_type: varchar
+        description: "Name of the stage (e.g., Swiss Stage, Group A)."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__stages
+    description: "Staging model for Tournament Stages (specific phase within an event)."
+    columns:
+      - name: stage_id
+        data_type: varchar
+        description: "Primary Key. Surrogate Key generated from Event ID + Stage Name + Step."
+        tests: [unique, not_null]
+
+      - name: stage_name_id
+        data_type: varchar
+        description: "Foreign Key to the Stage Name lookup."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__stage_names')
+                field: stage_name_id     
+
+      - name: event_id
+        data_type: varchar
+        description: "Foreign Key to the Event dimension."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__events')
+                field: event_id     
+
+      - name: stage_step_clean
+        data_type: varchar
+        description: "Normalized step number/identifier for the stage."
+
+      - name: stage_start_date_utc
+        data_type: timestamp_tz
+        description: "Start date and time of the stage in UTC."
+
+      - name: stage_end_date_utc
+        data_type: timestamp_tz
+        description: "End date and time of the stage in UTC."
+
+      - name: stage_is_lan
+        data_type: boolean
+        description: "Boolean flag indicating if the stage was played on LAN (offline)."
+
+      - name: stage_is_qualifier
+        data_type: boolean
+        description: "Boolean flag indicating if the stage is a qualifier."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: stg_rocket_league__teams
+    description: "Staging model for Teams."
+    columns:
+      - name: team_sk
+        data_type: varchar
+        description: "Primary Key. Surrogate Key unique for each version of the team history."
+        tests: [unique, not_null]
+
+      - name: team_nk
+        data_type: varchar
+        description: "Natural Key. Business ID of the team (repeats for historical versions)."
+        tests: [not_null]
+
+
+      - name: team_url
+        data_type: varchar
+        description: "Octane.gg URL profile for the team."
+
+      - name: team_name
+        data_type: varchar
+        description: "Name of the team."
+
+      - name: team_region_id
+        data_type: varchar
+        description: "Foreign Key to the Region dimension (home region of the team)."
+        tests:
+          - not_null
+          - relationships:
+              arguments:              
+                to: ref('stg_rocket_league__regions')
+                field: region_id 
+
+      - name: valid_from
+        data_type: timestamp_tz
+        description: "SCD Type 2: Start date of validity for this team version."
+        tests: [not_null]
+
+      - name: valid_to
+        data_type: timestamp_tz
+        description: "SCD Type 2: End date of validity for this team version."
+        tests: [not_null]
+
+      - name: is_current
+        data_type: boolean
+        description: "Flag indicating if this is the current active version of the team."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: base_rocket_league__event_regions
+    description: "Base ephemeral model extracting unique regions from event data."
+    columns:
+      - name: event_region_id
+        data_type: varchar
+        description: "Surrogate key for the region (unused in final mapping, kept for consistency)."
+        tests: [unique, not_null]
+
+      - name: event_region_name
+        data_type: varchar
+        description: "Region name found in the event source data."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: base_rocket_league__games_players
+    description: "Base incremental model containing cleaned raw data for games and players."
+    columns:
+      - name: game_player_id
+        data_type: varchar
+        description: "Primary Key. Hash of Game ID + Player ID."
+        tests: [unique, not_null]
+
+      - name: game_id
+        data_type: varchar
+        description: "Foreign Key to the Game dimension."
+
+      - name: player_id
+        data_type: varchar
+        description: "Foreign Key to the Player dimension."
+
+      - name: team_id
+        data_type: varchar
+        description: "Foreign Key to the Team dimension."
+
+      - name: platform_id
+        data_type: varchar
+        description: "Foreign Key to the Platform dimension."
+
+      - name: car_id
+        data_type: varchar
+        description: "Foreign Key to the Car dimension."
+
+      - name: platform
+        data_type: varchar
+        description: "Platform name."
+
+      - name: car_name
+        data_type: varchar
+        description: "Car name."
+
+      - name: boost_bpm
+        data_type: number
+        description: "Boost collected per minute."
+
+      - name: boost_bcpm
+        data_type: number
+        description: "Boost consumed per minute."
+
+      - name: boost_avg_amnt
+        data_type: number
+        description: "Average boost amount."
+
+      - name: boost_amnt_collected
+        data_type: number
+        description: "Total boost collected."
+
+      - name: boost_amnt_stolen
+        data_type: number
+        description: "Total boost stolen."
+
+      - name: movement_avg_speed
+        data_type: number
+        description: "Average speed."
+
+      - name: movement_percent_slow_speed
+        data_type: number
+        description: "Percentage time at slow speed."
+
+      - name: movement_percent_supersonic_speed
+        data_type: number
+        description: "Percentage time at supersonic speed."
+
+      - name: movement_percent_ground
+        data_type: number
+        description: "Percentage time on ground."
+
+      - name: movement_percent_high_air
+        data_type: number
+        description: "Percentage time in high air."
+
+      - name: positioning_percent_defensive_third
+        data_type: number
+        description: "Percentage time in defensive third."
+
+      - name: positioning_percent_offensive_third
+        data_type: number
+        description: "Percentage time in offensive third."
+
+      - name: positioning_percent_behind_ball
+        data_type: number
+        description: "Percentage time behind the ball."
+
+      - name: positioning_percent_most_back
+        data_type: number
+        description: "Percentage time as most back player."
+
+      - name: positioning_percent_most_forward
+        data_type: number
+        description: "Percentage time as most forward player."
+
+      - name: shots
+        data_type: number
+        description: "Shots on target."
+
+      - name: goals
+        data_type: number
+        description: "Goals scored."
+
+      - name: saves
+        data_type: number
+        description: "Saves made."
+
+      - name: assists
+        data_type: number
+        description: "Assists made."
+
+      - name: demo_inflicted
+        data_type: number
+        description: "Demolitions inflicted."
+
+      - name: demo_taken
+        data_type: number
+        description: "Demolitions taken."
+
+      - name: is_mvp
+        data_type: boolean
+        description: "MVP flag."
+
+      - name: is_winner
+        data_type: boolean
+        description: "Winner flag."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
+
+  - name: base_rocket_league__team_regions
+    description: "Base ephemeral model extracting unique regions from team data."
+    columns:
+      - name: team_region_id
+        data_type: varchar
+        description: "Surrogate key for the region (unused in final mapping)."
+        tests: [unique, not_null]
+
+      - name: team_region_name
+        data_type: varchar
+        description: "Region name found in the team source data."
+
+      - name: data_load
+        data_type: timestamp_tz
+        description: "Timestamp of data load."
