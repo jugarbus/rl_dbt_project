@@ -40,8 +40,7 @@ SELECT
     h.event_id,
     
     s.player_id,
-    COALESCE(t.team_sk, '-1') AS team_id,    
-    
+    COALESCE(t_hist.team_sk, t_curr.team_sk, '-1') AS team_id,    
     s.car_id,
     s.platform_id,
     
@@ -98,14 +97,22 @@ SELECT
 
     s.data_load AS data_load
 
+
 FROM player_kpis s
+
+-- Se añaden las fks
 LEFT JOIN game_hierarchy h 
     ON s.game_id = h.game_id
 
--- "Busca el equipo que tenga el mismo ID natural y que estuviera activo en la fecha del juego"
-LEFT JOIN dim_teams t
-    ON s.team_id = t.team_nk                -- Coincide el ID de negocio (NK)    
-    -- AND h.game_date_utc >= t.valid_from     
-    -- AND h.game_date_utc < t.valid_to 
-        AND  t.is_current='TRUE'
+
+-- HISTÓRICO: Se intenta buscar por fecha exacta
+LEFT JOIN dim_teams t_hist
+    ON s.team_id = t_hist.team_nk 
+    AND h.game_date_utc >= t_hist.valid_from 
+    AND h.game_date_utc < t_hist.valid_to 
+
+-- RESPALDO: Se intenta buscar la versión actual por si el histórico falla
+LEFT JOIN dim_teams t_curr
+    ON s.team_id = t_curr.team_nk 
+    AND t_curr.is_current = TRUE
        
