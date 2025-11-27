@@ -16,6 +16,16 @@ WITH player_kpis AS (
 
 game_hierarchy AS (
     SELECT * FROM {{ ref('int_rocket_league__game_hierarchy') }}
+),
+
+dim_teams AS (
+    SELECT 
+        team_sk,      -- Esta se usa en la Fact
+        team_nk,      -- Esta es la Natural Key (hash del id original)
+        valid_from,
+        valid_to,
+        is_current
+    FROM {{ ref('dim_teams') }}
 )
 
 SELECT
@@ -29,7 +39,8 @@ SELECT
     h.event_id,
     
     s.player_id,
-    s.team_id,
+    COALESCE(t.team_sk, '-1') AS team_id,    
+    
     s.car_id,
     s.platform_id,
 
@@ -89,3 +100,9 @@ SELECT
 FROM player_kpis s
 LEFT JOIN game_hierarchy h 
     ON s.game_id = h.game_id
+
+-- "Busca el equipo que tenga el mismo ID natural y que estuviera activo en la fecha del juego"
+LEFT JOIN dim_teams t
+    ON s.team_id = t.team_nk                -- Coincide el ID de negocio (NK)
+    AND h.game_date_utc >= t.valid_from     -- El juego fue después del inicio de la versión
+    AND h.game_date_utc < t.valid_to        -- El juego fue antes del fin de la versión

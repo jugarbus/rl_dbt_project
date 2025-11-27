@@ -11,10 +11,15 @@ regions AS (
 )
 
 SELECT
-    t.team_id,
+    t.team_sk,
+    t.team_nk,
     t.team_name,
     t.team_url,
     r.region_name,
+
+    t.valid_from,
+    t.valid_to,
+    t.is_current,
 
     t.data_load
 

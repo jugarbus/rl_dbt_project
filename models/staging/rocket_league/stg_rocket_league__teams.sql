@@ -1,52 +1,31 @@
-{{ config(
-    materialized='view'
-) }}
+{{ config(materialized='view') }}
 
-WITH src_games_teams AS (
-    SELECT * FROM {{ source('rocket_league', 'raw_games_teams') }}
+WITH snapshot_data AS (
+    -- Leemos la historia ya limpia
+    SELECT * FROM {{ ref('sns_rocket_league__teams') }}
 ),
 
-normalized AS (
-    SELECT 
-        LOWER(TRIM(team_id::varchar)) AS team_id_clean,
-        TRIM(team_slug::varchar) AS team_url_clean,
-        TRIM(team_name::varchar) AS team_name_clean,
-        
-        -- Limpieza de región
-        LOWER(COALESCE(TRIM(team_region::varchar), '{{ var("unknown_var", "unknown") }}')) AS team_region_clean,
-        
-        -- Fecha UTC
-        CONVERT_TIMEZONE('UTC', data_load) AS data_load
-
-    FROM src_games_teams
-    WHERE team_id IS NOT NULL
-),
-
-uniques AS (
-    SELECT *
-    FROM normalized
-    
-    QUALIFY ROW_NUMBER() OVER (
-        PARTITION BY team_id_clean 
-        ORDER BY     
-            data_load DESC,
-            team_name_clean DESC 
-    ) = 1
-),
-
-surrogate AS (
+final AS (
     SELECT
-        -- PK
-        {{ dbt_utils.generate_surrogate_key(['team_id_clean']) }} AS team_id,
-        team_id_clean AS team_nk,
-        team_url_clean AS team_url,
+        dbt_scd_id AS team_sk, -- Esta es la Primary Key única para la historia     
+
+        -- Datos de Negocio 
+        {{ dbt_utils.generate_surrogate_key(['team_id_clean']) }} AS team_nk, -- Se hace surrogada para que luego en fct haga match con la de int_rocket_league__add_kpis
         team_name_clean AS team_name,
+        team_url_clean AS team_url,
         
+        -- Generamos FK a región
         {{ dbt_utils.generate_surrogate_key(['team_region_clean']) }} AS team_region_id,
-        
-        -- Metadata
+
+        -- Metadatos SCD Tipo 2
+        dbt_valid_from AS valid_from,
+        COALESCE(dbt_valid_to, '9999-12-31'::timestamp) AS valid_to,
+
+            -- Útil para filtrar rápidamente "dame la foto de hoy"
+        CASE WHEN dbt_valid_to IS NULL THEN TRUE ELSE FALSE END AS is_current,        
         data_load
-    FROM uniques
+
+    FROM snapshot_data
 )
 
-SELECT * FROM surrogate
+SELECT * FROM final

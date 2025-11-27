@@ -50,7 +50,7 @@ imput_null_game_dates AS (
         match_id,
         game_number,
         
-        -- LÓGICA: Si no hay fecha de juego, usa fecha de partido + offset
+        -- Si no hay fecha de juego, usa fecha de partido + offset
         COALESCE(
             original_game_date_utc, 
             DATEADD(second, COALESCE(seconds_offset, 0), match_date_utc)
