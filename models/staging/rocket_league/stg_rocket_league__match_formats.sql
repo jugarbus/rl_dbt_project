@@ -17,7 +17,7 @@ cleaned_formats AS (
                     WHEN match_format = 'best-of-78' THEN '{{ var("match_format") }}'
                     ELSE match_format
                 END::varchar, 
-                '{{ var("unknown_var") }}'
+                '{{ var("match_format") }}'
             )
         )) AS match_format_clean,
 
