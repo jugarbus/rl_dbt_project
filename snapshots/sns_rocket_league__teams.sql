@@ -35,7 +35,6 @@ normalized AS (
         LOWER(COALESCE(TRIM(team_region::varchar), '{{ var("unknown_var") }}')) AS team_region_clean,
         
         -- Fechas convertidas
-        CONVERT_TIMEZONE('UTC', data_load) AS data_load_utc,
         CONVERT_TIMEZONE('UTC', match_date) AS match_date_utc,
         CONVERT_TIMEZONE('UTC', data_load) AS data_load 
 
@@ -52,7 +51,7 @@ deduplicated_source AS (
 
         -- Prioridad absoluta: La fecha en que ocurrió el partido.
         -- Desempate: Si jugaron 2 partidos el mismo día, se usa data_load.
-        ORDER BY match_date_utc DESC, data_load_utc DESC 
+        ORDER BY match_date_utc DESC, data_load DESC 
     ) = 1
 )
 
