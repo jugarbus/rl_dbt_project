@@ -91,6 +91,6 @@ rl_dbt_project/
 ├── dbt_project.yml     # Main project configuration file
 ├── packages.yml        # Project dependencies (e.g., dbt_utils)
 └── README.md           # Project documentation
-
+```
 ## 📊 Visualization
 The data in the Gold Layer is optimized for Power BI. The fct_game_player_stats table serves as the center of the star schema, allowing efficient filtering by Date, Event, or Team dimensions.
