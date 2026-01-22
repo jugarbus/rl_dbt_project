@@ -69,7 +69,7 @@ The `fct_game_player_stats` table contains the bulk of the data (millions of row
   )
 }}
 SELECT ...
-
+```
 
 ### 2. Snapshots for SCD Type 2 📸
 In esports, teams frequently rebrand or change organizations. A player might play for "Team A" in 2022 and "Team B" in 2023. Overwriting the team name would destroy historical accuracy.
@@ -80,18 +80,15 @@ In esports, teams frequently rebrand or change organizations. A player might pla
 ## 📂 Repository Structure
 
 ```bash
-rocket_league_dbt/
-├── models/
-│   ├── staging/        # Silver Layer: Cleaned 1:1 copies of source
-│   │   ├── stg_rl__games.sql
-│   │   ├── stg_rl__players.sql
-│   │   └── ...
-│   ├── marts/          # Gold Layer: Star Schema
-│   │   ├── core/       # Dimensions (dim_players, dim_teams, dim_date...)
-│   │   └── facts/      # Facts (fct_game_player_stats)
-│   └── sources.yml     # Snowflake source definitions
-├── snapshots/          # SCD Type 2 logic for Teams
-│   └── teams_snapshot.sql
-├── seeds/              # Static data (e.g., mapping tables)
-├── dbt_project.yml     # Project configuration
-└── README.md
+rl_dbt_project/
+├── analyses/           # Ad-hoc SQL queries and analysis scripts
+├── macros/             # Custom Jinja functions and hooks
+├── models/             # Transformation logic (SQL files)
+│   ├── staging/        # Silver Layer: Views/Tables mapped to source
+│   └── marts/          # Gold Layer: Star Schema (Facts & Dimensions)
+├── snapshots/          # SCD Type 2 logic (e.g., team history tracking)
+├── tests/              # Data integrity and schema tests
+├── dbt_project.yml     # Main project configuration file
+├── packages.yml        # Project dependencies (e.g., dbt_utils)
+└── README.md           # Project documentation
+
